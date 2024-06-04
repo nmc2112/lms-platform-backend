@@ -5,10 +5,7 @@ import com.example.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -31,6 +28,28 @@ public class UserController {
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         }
+    }
+
+    @DeleteMapping("/delete-user/{id}")
+    public ResponseEntity deleteUser(@PathVariable Long id) {
+        userService.delete(id);
+        return ResponseEntity.ok("Deleted user with id " + id);
+    }
+
+    @GetMapping("/sync")
+    public ResponseEntity syncUser() {
+        userService.getUsersFromClerk();
+        return ResponseEntity.ok("sync complete");
+    }
+
+    @GetMapping("/get-all-users")
+    public ResponseEntity listAllUsers() {
+        return ResponseEntity.ok(userService.findAll());
+    }
+
+    @PostMapping("/add-user")
+    public ResponseEntity addUser(@RequestBody User user) {
+        return ResponseEntity.ok(userService.findAll());
     }
     // token generation method
 }
