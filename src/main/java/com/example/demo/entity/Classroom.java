@@ -1,6 +1,6 @@
 package com.example.demo.entity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
@@ -9,16 +9,16 @@ public class Classroom {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "subjectName", length = 100, nullable = true)
     private String subjectName;
 
     @Column(name = "totalStudents", nullable = true)
-    private Integer totalStudents;
+    private Long totalStudents;
 
     @Column(name = "teacherId", nullable = true)
-    private Integer teacherId;
+    private Long teacherId;
 
     @Column(name = "startTime", nullable = true)
 //    @Temporal(TemporalType.DATE)
@@ -32,15 +32,15 @@ public class Classroom {
     private String meetingLink;
 
     @Column(name = "hostId", nullable = true)
-    private Integer hostId;
+    private Long hostId;
 
     // Getters and Setters
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -52,19 +52,19 @@ public class Classroom {
         this.subjectName = subjectName;
     }
 
-    public Integer getTotalStudents() {
+    public Long getTotalStudents() {
         return totalStudents;
     }
 
-    public void setTotalStudents(Integer totalStudents) {
+    public void setTotalStudents(Long totalStudents) {
         this.totalStudents = totalStudents;
     }
 
-    public Integer getTeacherId() {
+    public Long getTeacherId() {
         return teacherId;
     }
 
-    public void setTeacherId(Integer teacherId) {
+    public void setTeacherId(Long teacherId) {
         this.teacherId = teacherId;
     }
 
@@ -92,11 +92,11 @@ public class Classroom {
         this.meetingLink = meetingLink;
     }
 
-    public Integer getHostId() {
+    public Long getHostId() {
         return hostId;
     }
 
-    public void setHostId(Integer hostId) {
+    public void setHostId(Long hostId) {
         this.hostId = hostId;
     }
 }

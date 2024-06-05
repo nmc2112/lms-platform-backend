@@ -3,6 +3,8 @@ package com.example.demo.service.impl;
 import com.example.demo.entity.Classroom;
 import com.example.demo.repository.ClassroomRepository;
 import com.example.demo.service.ClassroomService;
+import com.google.api.client.util.DateTime;
+import com.google.api.services.calendar.model.Event;
 import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
 import lombok.RequiredArgsConstructor;
@@ -13,12 +15,14 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 @Service
 @RequiredArgsConstructor
 public class ClassroomServiceImpl implements ClassroomService {
     private final ClassroomRepository classroomRepository;
+    private final GoogleCalendarService googleCalendarService;
     @Autowired
     private JavaMailSender mailSender;
 
@@ -28,8 +32,31 @@ public class ClassroomServiceImpl implements ClassroomService {
     }
 
     @Override
-    public Classroom save(Classroom user) {
-        return null;
+    public Classroom save(Classroom classroom) throws Exception {
+        if (classroom.getId() == null) {
+            Event e = googleCalendarService.createGoogleMeetEvent(new DateTime(classroom.getStartTime()), new DateTime(classroom.getEndTime()));
+            classroom.setMeetingLink(e.getHangoutLink());
+            classroom.setTotalStudents(0l);
+            return classroomRepository.save(classroom);
+        } else {
+            Optional<Classroom> classroomOptional = classroomRepository.findById(classroom.getId());
+            if (classroomOptional.isPresent()) {
+                //neu thoi gian bat dau hoac ket thuc thay doi -> generate lai link gg meet
+                if (classroom.getStartTime()!=classroomOptional.get().getStartTime() || classroom.getEndTime()!=classroomOptional.get().getEndTime()) {
+                    Event e = googleCalendarService.createGoogleMeetEvent(new DateTime(classroom.getStartTime()), new DateTime(classroom.getEndTime()));
+                    classroomOptional.get().setMeetingLink(e.getHangoutLink());
+                }
+                //set lai thuoc tinh update
+                classroomOptional.get().setTotalStudents(classroomOptional.get().getTotalStudents() + 1);
+                classroomOptional.get().setStartTime(classroom.getStartTime());
+                classroomOptional.get().setEndTime(classroom.getEndTime());
+                classroomOptional.get().setSubjectName(classroom.getSubjectName());
+                classroomOptional.get().setTeacherId(classroom.getTeacherId());
+                classroomRepository.save(classroomOptional.get());
+            }
+            return null;
+        }
+
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.example.demo.entity.Classroom;
 import com.example.demo.repository.ClassroomRepository;
 import com.example.demo.service.ClassroomService;
 import com.example.demo.service.impl.GoogleCalendarService;
+import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,15 +23,17 @@ public class ClassroomController {
     public ResponseEntity getAllClassrooms() {
         return ResponseEntity.ok(classroomService.findAll());
     }
+
     @PostMapping("/save")
-    public ResponseEntity getAllClassrooms(@RequestBody Classroom classroom) {
+    public ResponseEntity getAllClassrooms(@RequestBody Classroom classroom) throws Exception {
+        // id=null -> create ---- id!=null -> update
         return ResponseEntity.ok(classroomService.save(classroom));
     }
 
     @GetMapping("/createGoogleMeet")
     public String createGoogleMeet() {
         try {
-            Event e = googleCalendarService.createGoogleMeetEvent();
+            Event e = googleCalendarService.createGoogleMeetEvent(new DateTime(System.currentTimeMillis()),new DateTime(System.currentTimeMillis()+3600000));
             return "Google Meet link created: " + e.getHangoutLink();
         } catch (Exception e) {
             e.printStackTrace();

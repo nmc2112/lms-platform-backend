@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ClassroomService {
     public List<Classroom> findAll();
-    public Classroom save(Classroom classroom);
+    public Classroom save(Classroom classroom) throws Exception;
     public void delete(Long id);
 
     void sendSimpleEmail(String to, String subject, String text);
