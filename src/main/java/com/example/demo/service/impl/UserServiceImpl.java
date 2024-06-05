@@ -10,6 +10,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -22,6 +24,7 @@ import java.util.Random;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RestTemplate restTemplate;
+
 
     @Value("${clerk.api.key}")
     private String clerkApiKey;
@@ -42,8 +45,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public User save(User user) {
         user.setPassword(this.getRandomString(6));
-
-
         return userRepository.save(user);
     }
 
@@ -59,15 +60,19 @@ public class UserServiceImpl implements UserService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<UserClerkDTO[]> response = restTemplate.exchange(clerkApiUrl, HttpMethod.GET, entity, UserClerkDTO[].class);
         List<User> rs = new ArrayList<>();
+        userRepository.deleteUsersFromClerk();
         for (UserClerkDTO userClerkDTO : response.getBody()) {
             User user = new User();
             user.setUsername(userClerkDTO.getUsername()==null?userClerkDTO.getEmail_addresses().get(0).getEmail_address():userClerkDTO.getUsername());
             user.setPassword(userClerkDTO.getPassword()==null?"":userClerkDTO.getPassword());
             user.setEmail(userClerkDTO.getEmail_addresses().get(0).getEmail_address());
+            user.setName(userClerkDTO.getFirst_name());
+            user.setUserClerkId(userClerkDTO.getId());
             rs.add(user);
         }
         userRepository.saveAll(rs);
     }
+
 
     private String getRandomString(int length) {
         String characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -80,4 +85,6 @@ public class UserServiceImpl implements UserService {
         }
         return result.toString();
     }
+
+
 }

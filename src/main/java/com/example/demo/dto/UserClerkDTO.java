@@ -14,4 +14,5 @@ public class UserClerkDTO {
     private String username;
     private String password;
     private List<Email> email_addresses;
+    private String first_name;
 }

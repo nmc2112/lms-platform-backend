@@ -4,7 +4,7 @@ import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "user")
@@ -30,10 +30,8 @@ public class User {
     @Column(name = "email")
     private String email;
 
+    @Column(name = "userClerkId")
+    private String userClerkId;
 
-    public User(String username, String password, String name) {
-        this.username = username;
-        this.password = password;
-        this.name = name;
-    }
+
 }
