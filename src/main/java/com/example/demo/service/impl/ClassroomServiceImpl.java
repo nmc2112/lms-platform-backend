@@ -1,19 +1,33 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.dto.ClassroomDTO;
 import com.example.demo.entity.Classroom;
+import com.example.demo.entity.User;
 import com.example.demo.repository.ClassroomRepository;
+import com.example.demo.repository.UserRepository;
 import com.example.demo.service.ClassroomService;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
-import jakarta.mail.PasswordAuthentication;
-import jakarta.mail.Session;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -22,13 +36,15 @@ import java.util.Properties;
 @RequiredArgsConstructor
 public class ClassroomServiceImpl implements ClassroomService {
     private final ClassroomRepository classroomRepository;
+    private final UserRepository userRepository;
     private final GoogleCalendarService googleCalendarService;
     @Autowired
     private JavaMailSender mailSender;
 
     @Override
-    public List<Classroom> findAll() {
-        return List.of();
+    public List<ClassroomDTO> findAll() {
+        List<ClassroomDTO> classrooms = classroomRepository.findAllAsDTO();
+        return classrooms;
     }
 
     @Override
@@ -42,7 +58,7 @@ public class ClassroomServiceImpl implements ClassroomService {
             Optional<Classroom> classroomOptional = classroomRepository.findById(classroom.getId());
             if (classroomOptional.isPresent()) {
                 //neu thoi gian bat dau hoac ket thuc thay doi -> generate lai link gg meet
-                if (classroom.getStartTime()!=classroomOptional.get().getStartTime() || classroom.getEndTime()!=classroomOptional.get().getEndTime()) {
+                if (classroom.getStartTime() != classroomOptional.get().getStartTime() || classroom.getEndTime() != classroomOptional.get().getEndTime()) {
                     Event e = googleCalendarService.createGoogleMeetEvent(new DateTime(classroom.getStartTime()), new DateTime(classroom.getEndTime()));
                     classroomOptional.get().setMeetingLink(e.getHangoutLink());
                 }
@@ -100,5 +116,49 @@ public class ClassroomServiceImpl implements ClassroomService {
         message.setSubject(subject);
         message.setText(text);
         mailSender.send(message);
+    }
+
+    @Override
+    public ResponseEntity<Resource> downloadTemplate() {
+
+        List<User> students = userRepository.findByRole("student");
+        List<ClassroomDTO> classrooms = classroomRepository.findAllAsDTO();
+
+        try (InputStream is = new ClassPathResource("excel/classroomRegister.xlsx").getInputStream();
+             Workbook workbook = new XSSFWorkbook(is)) {
+            Sheet sheet = workbook.getSheet("Specification");
+            // Creating header row
+            // Populating the data rows
+            int rowNum = 2;
+            for (User student : students) {
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(student.getName());
+                row.createCell(1).setCellValue(student.getEmail());
+            }
+            for (ClassroomDTO c : classrooms) {
+                Row row;
+                if (rowNum>sheet.getLastRowNum()) {row = sheet.createRow(rowNum++);}
+                else {row = sheet.getRow(rowNum++);}
+                row.createCell(3).setCellValue(c.getSubjectName());
+                row.createCell(4).setCellValue(c.getTeacherName());
+            }
+            // Write the output to a file
+            try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+                workbook.write(bos);
+                ByteArrayResource resource = new ByteArrayResource(bos.toByteArray());
+
+                // Get the file's media type (if necessary)
+                String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                // Prepare response with the file
+                return ResponseEntity.ok()
+                        .contentType(org.springframework.http.MediaType.parseMediaType(contentType))
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"students.xlsx\"")
+                        .body(resource);
+            }
+        } catch (Exception e) {
+            // Handle error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }

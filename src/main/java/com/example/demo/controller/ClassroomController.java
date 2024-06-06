@@ -1,14 +1,22 @@
 package com.example.demo.controller;
 
 import com.example.demo.entity.Classroom;
-import com.example.demo.repository.ClassroomRepository;
+
 import com.example.demo.service.ClassroomService;
 import com.example.demo.service.impl.GoogleCalendarService;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.core.io.Resource;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @RestController
 @RequestMapping("/classroom")
@@ -51,5 +59,10 @@ public class ClassroomController {
             e.printStackTrace();
             return "Failed to send email";
         }
+    }
+
+    @GetMapping("/downloadTemplate")
+    public ResponseEntity<Resource> downloadTemplate() {
+        return classroomService.downloadTemplate();
     }
 }
