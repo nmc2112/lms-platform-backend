@@ -11,4 +11,5 @@ public interface UserService {
     public void delete(Long id);
     public void getUsersFromClerk();
     public List<User> findAllTeacher();
+    public List<User> findAllStudents();
 }

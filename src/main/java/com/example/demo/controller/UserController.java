@@ -53,6 +53,11 @@ public class UserController {
         return ResponseEntity.ok(userService.findAllTeacher());
     }
 
+    @GetMapping("/get-all-students")
+    public ResponseEntity listAllStudents() {
+        return ResponseEntity.ok(userService.findAllStudents());
+    }
+
     @PostMapping("/add-user")
     public ResponseEntity addUser(@RequestBody User user) {
         return ResponseEntity.ok(userService.findAll());

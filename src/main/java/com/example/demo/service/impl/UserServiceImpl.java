@@ -48,6 +48,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<User> findAllStudents() {
+        return userRepository.findAllStudents();
+    }
+
+    @Override
     public User save(User user) {
         user.setPassword(this.getRandomString(6));
         return userRepository.save(user);

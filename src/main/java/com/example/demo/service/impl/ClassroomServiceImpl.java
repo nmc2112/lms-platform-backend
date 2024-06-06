@@ -138,6 +138,7 @@ public class ClassroomServiceImpl implements ClassroomService {
                 row.createCell(0).setCellValue(student.getName());
                 row.createCell(1).setCellValue(student.getEmail());
             }
+            rowNum = 2;
             for (ClassroomDTO c : classrooms) {
                 Row row;
                 if (rowNum>sheet.getLastRowNum()) {row = sheet.createRow(rowNum++);}
