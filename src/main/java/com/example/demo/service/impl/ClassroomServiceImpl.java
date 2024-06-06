@@ -34,6 +34,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.stereotype.Service;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 @Service
 @RequiredArgsConstructor
 public class ClassroomServiceImpl implements ClassroomService {
@@ -129,23 +138,47 @@ public class ClassroomServiceImpl implements ClassroomService {
 
         try (InputStream is = new ClassPathResource("excel/classroomRegister.xlsx").getInputStream();
              Workbook workbook = new XSSFWorkbook(is)) {
-            Sheet sheet = workbook.getSheet("Specification");
+            Sheet specificationSheet = workbook.getSheet("Specification");
             // Creating header row
             // Populating the data rows
             int rowNum = 2;
             for (User student : students) {
-                Row row = sheet.createRow(rowNum++);
+                Row row = specificationSheet.createRow(rowNum++);
                 row.createCell(0).setCellValue(student.getName());
                 row.createCell(1).setCellValue(student.getEmail());
             }
             rowNum = 2;
             for (ClassroomDTO c : classrooms) {
                 Row row;
-                if (rowNum>sheet.getLastRowNum()) {row = sheet.createRow(rowNum++);}
-                else {row = sheet.getRow(rowNum++);}
+                if (rowNum > specificationSheet.getLastRowNum()) {
+                    row = specificationSheet.createRow(rowNum);
+                } else {
+                    row = specificationSheet.getRow(rowNum);
+                }
                 row.createCell(3).setCellValue(c.getSubjectName());
                 row.createCell(4).setCellValue(c.getTeacherName());
+                rowNum++;
             }
+
+            Sheet importDataSheet = workbook.getSheet("Import data");
+
+            DataValidationHelper validationHelper = importDataSheet.getDataValidationHelper();
+
+            // Create data validation for column B (Names)
+            DataValidationConstraint nameConstraint = validationHelper.createFormulaListConstraint("Specification!$A$3:$A$" + students.size() + 2);
+            CellRangeAddressList nameAddressList = new CellRangeAddressList(1, 50, 1, 1);
+            DataValidation nameValidation = validationHelper.createValidation(nameConstraint, nameAddressList);
+
+            // Create data validation for column C (Emails)
+            DataValidationConstraint emailConstraint = validationHelper.createFormulaListConstraint("Specification!$B$3:$B$" + students.size() + 2);
+            CellRangeAddressList emailAddressList = new CellRangeAddressList(1, 50, 2, 2);
+            DataValidation emailValidation = validationHelper.createValidation(emailConstraint, emailAddressList);
+
+            // Add the validations to the sheet
+            importDataSheet.addValidationData(nameValidation);
+            importDataSheet.addValidationData(emailValidation);
+
+
             // Write the output to a file
             try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
                 workbook.write(bos);
