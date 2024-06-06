@@ -14,4 +14,5 @@ public interface ClassroomRepository extends JpaRepository<Classroom, Long> {
     @Query("SELECT new com.example.demo.dto.ClassroomDTO(c.id, c.subjectName, c.totalStudents, c.teacherId, u.name, c.startTime, c.endTime, c.meetingLink) " +
             "FROM Classroom c left JOIN User u ON c.teacherId = u.id")
     List<ClassroomDTO> findAllAsDTO();
+
 }

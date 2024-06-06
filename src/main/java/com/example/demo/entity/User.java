@@ -33,5 +33,6 @@ public class User {
     @Column(name = "userClerkId")
     private String userClerkId;
 
-
+    @Column(name = "role")
+    private String role;
 }
