@@ -1,5 +1,6 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.dto.ClassroomDTO;
 import com.example.demo.entity.Classroom;
 import com.example.demo.repository.ClassroomRepository;
 import com.example.demo.service.ClassroomService;
@@ -27,8 +28,9 @@ public class ClassroomServiceImpl implements ClassroomService {
     private JavaMailSender mailSender;
 
     @Override
-    public List<Classroom> findAll() {
-        return List.of();
+    public List<ClassroomDTO> findAll() {
+        List<ClassroomDTO> classrooms = classroomRepository.findAllAsDTO();
+        return classrooms;
     }
 
     @Override
