@@ -34,6 +34,12 @@ public class Classroom {
     @Column(name = "hostId", nullable = true)
     private Long hostId;
 
+    @Column(name = "description", nullable = true)
+    private String description;
+
+    @Column(name = "imgUrl", nullable = true)
+    private String imgUrl;
+
     // Getters and Setters
 
     public Long getId() {

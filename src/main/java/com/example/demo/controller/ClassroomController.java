@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.Classroom;
 
+import com.example.demo.repository.ClassroomRepository;
 import com.example.demo.service.ClassroomService;
 import com.example.demo.service.impl.GoogleCalendarService;
 import com.google.api.client.util.DateTime;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/classroom")
@@ -25,6 +27,7 @@ import java.nio.file.Paths;
 public class ClassroomController {
 
     private final ClassroomService classroomService;
+    private final ClassroomRepository classroomRepository;
     private final GoogleCalendarService googleCalendarService;
 
 
@@ -32,6 +35,7 @@ public class ClassroomController {
     public ResponseEntity getAllClassrooms() {
         return ResponseEntity.ok(classroomService.findAll());
     }
+
 
     @PostMapping("/save")
     public ResponseEntity getAllClassrooms(@RequestBody Classroom classroom) throws Exception {
@@ -64,5 +68,17 @@ public class ClassroomController {
     @GetMapping("/downloadTemplate")
     public ResponseEntity<Resource> downloadTemplate() {
         return classroomService.downloadTemplate();
+    }
+
+    @GetMapping("/detail/{id}")
+    public ResponseEntity getDetail(@PathVariable Long id) {
+        return ResponseEntity.ok(classroomService.findById(id));
+    }
+
+    @PostMapping("/add-student-to-classroom")
+    public ResponseEntity addStudentToClassroom(@RequestBody Map<String, Long> map) {
+        Long studentId = map.get("studentId");
+        Long classroomId = map.get("classroomId");
+        return ResponseEntity.ok(classroomService.addStudentToClassroom(classroomId,studentId));
     }
 }

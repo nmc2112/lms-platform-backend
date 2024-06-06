@@ -16,4 +16,6 @@ public interface ClassroomService {
     void sendSimpleEmail(String to, String subject, String text);
 
     ResponseEntity<Resource> downloadTemplate();
+    public ClassroomDTO findById(Long id);
+    public ClassroomDTO addStudentToClassroom(Long classroomId, Long studentId);
 }

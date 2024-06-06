@@ -2,8 +2,10 @@ package com.example.demo.service.impl;
 
 import com.example.demo.dto.ClassroomDTO;
 import com.example.demo.entity.Classroom;
+import com.example.demo.entity.StudentClassroom;
 import com.example.demo.entity.User;
 import com.example.demo.repository.ClassroomRepository;
+import com.example.demo.repository.StudentClassroomRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.ClassroomService;
 import com.google.api.client.util.DateTime;
@@ -38,6 +40,7 @@ public class ClassroomServiceImpl implements ClassroomService {
     private final ClassroomRepository classroomRepository;
     private final UserRepository userRepository;
     private final GoogleCalendarService googleCalendarService;
+    private final StudentClassroomRepository studentClassroomRepository;
     @Autowired
     private JavaMailSender mailSender;
 
@@ -160,5 +163,23 @@ public class ClassroomServiceImpl implements ClassroomService {
             // Handle error
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @Override
+    public ClassroomDTO findById(Long id) {
+        ClassroomDTO classroomDTO = classroomRepository.findByIdAsDTO(id);
+        List<Long> studentIds = studentClassroomRepository.findStudentsByClassroomId(id);
+        List<User> students = userRepository.findAllById(studentIds);
+        classroomDTO.setListStudents(students);
+        return classroomDTO;
+    }
+
+    @Override
+    public ClassroomDTO addStudentToClassroom(Long classroomId, Long studentId) {
+        StudentClassroom studentClassroom = new StudentClassroom();
+        studentClassroom.setStudentId(studentId);
+        studentClassroom.setClassroomId(classroomId);
+        studentClassroomRepository.save(studentClassroom);
+        return findById(classroomId);
     }
 }
