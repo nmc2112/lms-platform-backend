@@ -75,6 +75,11 @@ public class ClassroomController {
         return ResponseEntity.ok(classroomService.findById(id));
     }
 
+    @GetMapping("/get-students-to-add/{classroomId}")
+    public ResponseEntity getStudentsToAdd(@PathVariable Long classroomId) {
+        return ResponseEntity.ok(classroomService.getStudentsToAdd(classroomId));
+    }
+
     @PostMapping("/add-student-to-classroom")
     public ResponseEntity addStudentToClassroom(@RequestBody Map<String, Long> map) {
         Long studentId = map.get("studentId");

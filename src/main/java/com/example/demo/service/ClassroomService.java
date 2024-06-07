@@ -18,4 +18,5 @@ public interface ClassroomService {
     ResponseEntity<Resource> downloadTemplate();
     public ClassroomDTO findById(Long id);
     public ClassroomDTO addStudentToClassroom(Long classroomId, Long studentId);
+    List<User> getStudentsToAdd(Long classroomId);
 }

@@ -226,4 +226,9 @@ public class ClassroomServiceImpl implements ClassroomService {
         this.sendSimpleEmail(user.getEmail(), "LMS Education notification for student","You has been added to a new classroom.\nSubject name: "+classroom.getSubjectName()+".\nYour classroom meeting link: "+classroom.getMeetingLink()+"\nStart at:"+formatter.format(classroom.getStartTime())+"\nEnd at:"+formatter.format(classroom.getEndTime()));
         return findById(classroomId);
     }
+
+    @Override
+    public List<User> getStudentsToAdd(Long classroomId) {
+        return List.of();
+    }
 }
