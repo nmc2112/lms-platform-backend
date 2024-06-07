@@ -75,7 +75,7 @@ public class ClassroomServiceImpl implements ClassroomService {
                     classroomOptional.get().setMeetingLink(e.getHangoutLink());
                 }
                 //set lai thuoc tinh update
-                classroomOptional.get().setTotalStudents(classroomOptional.get().getTotalStudents() + 1);
+//                classroomOptional.get().setTotalStudents(classroomOptional.get().getTotalStudents() + 1);
                 classroomOptional.get().setStartTime(classroom.getStartTime());
                 classroomOptional.get().setEndTime(classroom.getEndTime());
                 classroomOptional.get().setSubjectName(classroom.getSubjectName());
@@ -213,6 +213,9 @@ public class ClassroomServiceImpl implements ClassroomService {
         StudentClassroom studentClassroom = new StudentClassroom();
         studentClassroom.setStudentId(studentId);
         studentClassroom.setClassroomId(classroomId);
+        Classroom classroom = classroomRepository.findById(classroomId).get();
+        classroom.setTotalStudents(classroom.getTotalStudents() + 1);
+        classroomRepository.save(classroom);
         studentClassroomRepository.save(studentClassroom);
         return findById(classroomId);
     }
