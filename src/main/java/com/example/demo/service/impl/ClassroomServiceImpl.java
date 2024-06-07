@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -65,6 +66,9 @@ public class ClassroomServiceImpl implements ClassroomService {
             Event e = googleCalendarService.createGoogleMeetEvent(new DateTime(classroom.getStartTime()), new DateTime(classroom.getEndTime()));
             classroom.setMeetingLink(e.getHangoutLink());
             classroom.setTotalStudents(0l);
+            User teacher = userRepository.findById(classroom.getTeacherId()).get();
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+            this.sendSimpleEmail(teacher.getEmail(), "LMS Education notification for teacher","You has been assigned to teach: "+classroom.getSubjectName()+".\nYour classroom meeting link: "+classroom.getMeetingLink()+"\nStart at:"+formatter.format(classroom.getStartTime())+"\nEnd at:"+formatter.format(classroom.getEndTime()));
             return classroomRepository.save(classroom);
         } else {
             Optional<Classroom> classroomOptional = classroomRepository.findById(classroom.getId());
@@ -214,9 +218,12 @@ public class ClassroomServiceImpl implements ClassroomService {
         studentClassroom.setStudentId(studentId);
         studentClassroom.setClassroomId(classroomId);
         Classroom classroom = classroomRepository.findById(classroomId).get();
+        User user = userRepository.findById(studentId).get();
         classroom.setTotalStudents(classroom.getTotalStudents() + 1);
         classroomRepository.save(classroom);
         studentClassroomRepository.save(studentClassroom);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+        this.sendSimpleEmail(user.getEmail(), "LMS Education notification for student","You has been added to a new classroom.\nSubject name: "+classroom.getSubjectName()+".\nYour classroom meeting link: "+classroom.getMeetingLink()+"\nStart at:"+formatter.format(classroom.getStartTime())+"\nEnd at:"+formatter.format(classroom.getEndTime()));
         return findById(classroomId);
     }
 }
