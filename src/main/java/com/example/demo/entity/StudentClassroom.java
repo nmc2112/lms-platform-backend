@@ -2,11 +2,13 @@ package com.example.demo.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity(name = "student_classroom")
 @Getter
 @Setter
+@NoArgsConstructor
 public class StudentClassroom {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,5 +20,8 @@ public class StudentClassroom {
     @Column(name = "classroomId")
     private Long classroomId;
 
-
+    public StudentClassroom(Long studentId, Long classroomId) {
+        this.studentId = studentId;
+        this.classroomId = classroomId;
+    }
 }

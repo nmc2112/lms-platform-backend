@@ -1,6 +1,8 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.dto.ClassroomDTO;
+import com.example.demo.dto.ImportClassroomDTO;
+import com.example.demo.dto.ImportResponse;
 import com.example.demo.entity.Classroom;
 import com.example.demo.entity.StudentClassroom;
 import com.example.demo.entity.User;
@@ -8,14 +10,13 @@ import com.example.demo.repository.ClassroomRepository;
 import com.example.demo.repository.StudentClassroomRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.ClassroomService;
+import com.example.demo.util.Utils;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -23,26 +24,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
-
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellRangeAddressList;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.stereotype.Service;
-
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -51,13 +40,12 @@ public class ClassroomServiceImpl implements ClassroomService {
     private final UserRepository userRepository;
     private final GoogleCalendarService googleCalendarService;
     private final StudentClassroomRepository studentClassroomRepository;
-    @Autowired
-    private JavaMailSender mailSender;
+//    @Autowired
+//    private JavaMailSender mailSender;
 
     @Override
     public List<ClassroomDTO> findAll() {
-        List<ClassroomDTO> classrooms = classroomRepository.findAllAsDTO();
-        return classrooms;
+        return classroomRepository.findAllAsDTO();
     }
 
     @Override
@@ -65,10 +53,10 @@ public class ClassroomServiceImpl implements ClassroomService {
         if (classroom.getId() == null) {
             Event e = googleCalendarService.createGoogleMeetEvent(new DateTime(classroom.getStartTime()), new DateTime(classroom.getEndTime()));
             classroom.setMeetingLink(e.getHangoutLink());
-            classroom.setTotalStudents(0l);
-            User teacher = userRepository.findById(classroom.getTeacherId()).get();
+            classroom.setTotalStudents(0L);
+            User teacher = userRepository.findById(classroom.getTeacherId()).orElse(new User());
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-            this.sendSimpleEmail(teacher.getEmail(), "LMS Education notification for teacher","You has been assigned to teach: "+classroom.getSubjectName()+".\nYour classroom meeting link: "+classroom.getMeetingLink()+"\nStart at:"+formatter.format(classroom.getStartTime())+"\nEnd at:"+formatter.format(classroom.getEndTime()));
+            this.sendSimpleEmail(teacher.getEmail(), "LMS Education notification for teacher", "You has been assigned to teach: " + classroom.getSubjectName() + ".\nYour classroom meeting link: " + classroom.getMeetingLink() + "\nStart at:" + formatter.format(classroom.getStartTime()) + "\nEnd at:" + formatter.format(classroom.getEndTime()));
             return classroomRepository.save(classroom);
         } else {
             Optional<Classroom> classroomOptional = classroomRepository.findById(classroom.getId());
@@ -174,8 +162,8 @@ public class ClassroomServiceImpl implements ClassroomService {
             DataValidation nameValidation = validationHelper.createValidation(nameConstraint, nameAddressList);
 
             // Create data validation for column D (teacher)
-            DataValidationConstraint emailConstraint = validationHelper.createFormulaListConstraint("Specification!$C$3:$B$" + classrooms.size() + 2);
-            CellRangeAddressList emailAddressList = new CellRangeAddressList(1, 50, 2, 2);
+            DataValidationConstraint emailConstraint = validationHelper.createFormulaListConstraint("Specification!$D$3:$D$" + classrooms.size() + 2);
+            CellRangeAddressList emailAddressList = new CellRangeAddressList(1, 50, 3, 3);
             DataValidation emailValidation = validationHelper.createValidation(emailConstraint, emailAddressList);
 
             // Add the validations to the sheet
@@ -217,18 +205,115 @@ public class ClassroomServiceImpl implements ClassroomService {
         StudentClassroom studentClassroom = new StudentClassroom();
         studentClassroom.setStudentId(studentId);
         studentClassroom.setClassroomId(classroomId);
-        Classroom classroom = classroomRepository.findById(classroomId).get();
-        User user = userRepository.findById(studentId).get();
+        Classroom classroom = classroomRepository.findById(classroomId).orElse(new Classroom());
+        User user = userRepository.findById(studentId).orElse(new User());
         classroom.setTotalStudents(classroom.getTotalStudents() + 1);
         classroomRepository.save(classroom);
         studentClassroomRepository.save(studentClassroom);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-        this.sendSimpleEmail(user.getEmail(), "LMS Education notification for student","You has been added to a new classroom.\nSubject name: "+classroom.getSubjectName()+".\nYour classroom meeting link: "+classroom.getMeetingLink()+"\nStart at:"+formatter.format(classroom.getStartTime())+"\nEnd at:"+formatter.format(classroom.getEndTime()));
+        this.sendSimpleEmail(user.getEmail(), "LMS Education notification for student", "You has been added to a new classroom.\nSubject name: " + classroom.getSubjectName() + ".\nYour classroom meeting link: " + classroom.getMeetingLink() + "\nStart at:" + formatter.format(classroom.getStartTime()) + "\nEnd at:" + formatter.format(classroom.getEndTime()));
         return findById(classroomId);
     }
 
     @Override
     public List<User> getStudentsToAdd(Long classroomId) {
         return List.of();
+    }
+
+    @Override
+    public ImportResponse importExcel(MultipartFile file) {
+        ImportResponse response = new ImportResponse();
+        List<String> errors = new ArrayList<>();
+        try {
+            InputStream inputStream = file.getInputStream();
+            Workbook workbook = new XSSFWorkbook(inputStream);
+            Sheet sheet = workbook.getSheetAt(0);
+            int startRow = 2; //bỏ qua 2 dòng
+            List<ImportClassroomDTO> rs = new ArrayList<>();
+            for (int i = startRow; i < sheet.getLastRowNum(); i++) {
+                ImportClassroomDTO importClassroomDTO = new ImportClassroomDTO();
+                Row currentRow = sheet.getRow(i);
+                Iterator<Cell> cellsInRow = currentRow.iterator();
+                int cellIdx = 0;
+                boolean studentNameIsBlank = false;
+                boolean studentEmailIsBlank = false;
+                boolean subjectNameIsBlank = false;
+                boolean teacherNameIsBlank = false;
+                String inputStudentName, inputStudentEmail = "", inputSubjectName = "", inputTeacherName = "";
+                for (int j = 0; j < currentRow.getLastCellNum(); j++) {
+                    Cell currentCell = cellsInRow.next();
+                    switch (cellIdx) {
+                        case 0:
+                            String number = currentCell.getStringCellValue().trim();
+                            if (!Utils.isLong(number)) {
+                                errors.add("Line " + (i + 1) + ": Invalid number");
+                            }
+                            break;
+                        case 1:
+                            inputStudentName = currentCell.getStringCellValue().trim();
+                            if (Utils.isNullOrEmpty(inputStudentName)) {
+                                errors.add("Line " + (i + 1) + ": Student name is required");
+                                studentNameIsBlank = true;
+                            }
+                            break;
+                        case 2:
+                            inputStudentEmail = currentCell.getStringCellValue().trim();
+                            if (Utils.isNullOrEmpty(inputStudentEmail)) {
+                                errors.add("Line " + (i + 1) + ": Student email is required");
+                                studentEmailIsBlank = true;
+                            }
+                            break;
+                        case 3:
+                            inputSubjectName = currentCell.getStringCellValue().trim();
+                            if (Utils.isNullOrEmpty(inputSubjectName)) {
+                                errors.add("Line " + (i + 1) + ": Subject name is required");
+                                subjectNameIsBlank = true;
+                            }
+                            break;
+                        case 4:
+                            inputTeacherName = currentCell.getStringCellValue().trim();
+                            if (Utils.isNullOrEmpty(inputTeacherName)) {
+                                errors.add("Line " + (i + 1) + ": Teacher name is required");
+                                teacherNameIsBlank = true;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                    cellIdx++;
+                }
+                if (!studentNameIsBlank && !studentEmailIsBlank) {
+                    User student = userRepository.findByEmail(inputStudentEmail);
+                    if (student == null) {
+                        errors.add("Line " + (i + 1) + ": Student not found");
+                    } else {
+                        importClassroomDTO.setStudent(student);
+                    }
+                }
+                if (!subjectNameIsBlank && !teacherNameIsBlank) {
+                    Classroom classroom = classroomRepository.findBySubjectNameAndTeacherName(inputSubjectName,inputTeacherName);
+                    if (classroom == null) {
+                        errors.add("Line " + (i + 1) + ": Classroom not found");
+                    } else {
+                        importClassroomDTO.setClassroom(classroom);
+                    }
+                }
+                rs.add(importClassroomDTO);
+            }
+            if (errors.isEmpty()){
+                List<StudentClassroom> studentClassrooms = rs.stream()
+                        .map(data -> new StudentClassroom(data.getStudent().getId(), data.getClassroom().getId()))
+                        .toList();
+                studentClassroomRepository.saveAll(studentClassrooms);
+                response.setSuccess(true);
+                return response;
+            } else {
+                response.setSuccess(false);
+                response.setError(errors);
+                return response;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

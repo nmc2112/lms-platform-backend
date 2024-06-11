@@ -29,4 +29,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "select * from user where role='student'",nativeQuery = true)
     public List<User> findAllStudents();
 
+    User findByName(String name);
+    User findByEmail(String email);
 }

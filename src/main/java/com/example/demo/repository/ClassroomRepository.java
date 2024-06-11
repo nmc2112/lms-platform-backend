@@ -22,4 +22,10 @@ public interface ClassroomRepository extends JpaRepository<Classroom, Long> {
 
     @Query("SELECT c, u FROM Classroom c left JOIN User u ON c.teacherId = u.id")
     List<Object[]> testJoin();
+
+    @Query(value = "SELECT c from classroom c " +
+            "left join user u on u.id = c.teacherId " +
+            "where c.subjectName = :subjectName " +
+            "and u.name = :teacherName LIMIT 1", nativeQuery = true)
+    Classroom findBySubjectNameAndTeacherName(@Param("subjectName") String subjectName, @Param("teacherName") String teacherName);
 }

@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.core.io.Resource;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -85,5 +87,10 @@ public class ClassroomController {
         Long studentId = map.get("studentId");
         Long classroomId = map.get("classroomId");
         return ResponseEntity.ok(classroomService.addStudentToClassroom(classroomId,studentId));
+    }
+
+    @PostMapping("/import")
+    public ResponseEntity importExcel(@RequestParam("file") MultipartFile file) {
+        return ResponseEntity.ok(classroomService.importExcel(file));
     }
 }
