@@ -173,8 +173,8 @@ public class ClassroomServiceImpl implements ClassroomService {
             CellRangeAddressList nameAddressList = new CellRangeAddressList(1, 50, 1, 1);
             DataValidation nameValidation = validationHelper.createValidation(nameConstraint, nameAddressList);
 
-            // Create data validation for column C (Emails)
-            DataValidationConstraint emailConstraint = validationHelper.createFormulaListConstraint("Specification!$B$3:$B$" + students.size() + 2);
+            // Create data validation for column D (teacher)
+            DataValidationConstraint emailConstraint = validationHelper.createFormulaListConstraint("Specification!$C$3:$B$" + classrooms.size() + 2);
             CellRangeAddressList emailAddressList = new CellRangeAddressList(1, 50, 2, 2);
             DataValidation emailValidation = validationHelper.createValidation(emailConstraint, emailAddressList);
 
