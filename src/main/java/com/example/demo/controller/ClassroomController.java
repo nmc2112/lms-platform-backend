@@ -72,6 +72,11 @@ public class ClassroomController {
         return classroomService.downloadTemplate();
     }
 
+    @GetMapping("/{id}/exportStudentList")
+    public ResponseEntity<Resource> exportStudentList(@PathVariable long id) {
+        return classroomService.exportStudentList(id);
+    }
+
     @GetMapping("/detail/{id}")
     public ResponseEntity getDetail(@PathVariable Long id) {
         return ResponseEntity.ok(classroomService.findById(id));

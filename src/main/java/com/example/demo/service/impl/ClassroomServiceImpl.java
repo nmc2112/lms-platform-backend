@@ -228,7 +228,7 @@ public class ClassroomServiceImpl implements ClassroomService {
             InputStream inputStream = file.getInputStream();
             Workbook workbook = new XSSFWorkbook(inputStream);
             Sheet sheet = workbook.getSheetAt(0);
-            int startRow = 2; //bỏ qua 2 dòng
+            int startRow = 1; //bỏ qua 1 dòng heading
             List<ImportClassroomDTO> rs = new ArrayList<>();
             for (int i = startRow; i < sheet.getLastRowNum(); i++) {
                 ImportClassroomDTO importClassroomDTO = new ImportClassroomDTO();
@@ -314,6 +314,44 @@ public class ClassroomServiceImpl implements ClassroomService {
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public ResponseEntity<Resource> exportStudentList(long id) {
+        ClassroomDTO classroomDTO = classroomRepository.findByIdAsDTO(id);
+        List<Long> studentIds = studentClassroomRepository.findStudentsByClassroomId(id);
+        List<User> students = userRepository.findAllById(studentIds);
+        try (InputStream is = new ClassPathResource("excel/studentListByClassroom.xlsx").getInputStream();
+             Workbook workbook = new XSSFWorkbook(is)) {
+            Sheet specificationSheet = workbook.getSheetAt(0);
+            // Creating header row
+            // Populating the data rows
+            int rowNum = 1;
+            for (User student : students) {
+                Row row = specificationSheet.createRow(rowNum);
+                row.createCell(0).setCellValue(rowNum++);
+                row.createCell(1).setCellValue(student.getName());
+                row.createCell(2).setCellValue(student.getEmail());
+            }
+
+            // Write the output to a file
+            try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+                workbook.write(bos);
+                ByteArrayResource resource = new ByteArrayResource(bos.toByteArray());
+
+                // Get the file's media type (if necessary)
+                String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                // Prepare response with the file
+                return ResponseEntity.ok()
+                        .contentType(org.springframework.http.MediaType.parseMediaType(contentType))
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"students.xlsx\"")
+                        .body(resource);
+            }
+        } catch (Exception e) {
+            // Handle error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

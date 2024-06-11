@@ -23,4 +23,6 @@ public interface ClassroomService {
     List<User> getStudentsToAdd(Long classroomId);
 
     public ImportResponse importExcel(MultipartFile file);
+
+    ResponseEntity<Resource> exportStudentList(long id);
 }
