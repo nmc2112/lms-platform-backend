@@ -233,6 +233,7 @@ public class ClassroomServiceImpl implements ClassroomService {
             for (int i = startRow; i < sheet.getLastRowNum(); i++) {
                 ImportClassroomDTO importClassroomDTO = new ImportClassroomDTO();
                 Row currentRow = sheet.getRow(i);
+                if (!isRowNotEmpty(currentRow)) break;
                 Iterator<Cell> cellsInRow = currentRow.iterator();
                 int cellIdx = 0;
                 boolean studentNameIsBlank = false;
@@ -245,7 +246,7 @@ public class ClassroomServiceImpl implements ClassroomService {
                     switch (cellIdx) {
                         case 0:
                             String number = currentCell.getStringCellValue().trim();
-                            if (!Utils.isLong(number)) {
+                            if (!number.isEmpty()&&!Utils.isLong(number)) {
                                 errors.add("Line " + (i + 1) + ": Invalid number");
                             }
                             break;
@@ -315,6 +316,19 @@ public class ClassroomServiceImpl implements ClassroomService {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static boolean isRowNotEmpty(Row row) {
+        if (row == null) {
+            return false;
+        }
+
+        for (int cellNum = row.getFirstCellNum(); cellNum <= row.getLastCellNum(); cellNum++) {
+            if (row.getCell(cellNum) != null && !row.getCell(cellNum).toString().trim().isEmpty()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
