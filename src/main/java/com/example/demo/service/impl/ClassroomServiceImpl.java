@@ -124,7 +124,7 @@ public class ClassroomServiceImpl implements ClassroomService {
 
     @Override
     public ResponseEntity<Resource> downloadTemplate() {
-
+        // lay data cho vao danh muc
         List<User> students = userRepository.findByRole("student");
         List<ClassroomDTO> classrooms = classroomRepository.findAllAsDTO();
 
@@ -151,7 +151,7 @@ public class ClassroomServiceImpl implements ClassroomService {
                 row.createCell(4).setCellValue(c.getTeacherName());
                 rowNum++;
             }
-
+            // fill xong data specification sheet
             Sheet importDataSheet = workbook.getSheet("Import data");
 
             DataValidationHelper validationHelper = importDataSheet.getDataValidationHelper();
