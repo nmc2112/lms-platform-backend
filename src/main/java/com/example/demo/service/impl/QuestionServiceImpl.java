@@ -42,7 +42,7 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public ResponseEntity<Resource> downloadTemplate(HttpServletRequest request) {
 
-        String userId = request.getParameter("userId");
+        String userId = request.getHeader("Userid");
 
 
         // lay data cho vao danh muc
@@ -65,7 +65,7 @@ public class QuestionServiceImpl implements QuestionService {
             DataValidationHelper validationHelper = importDataSheet.getDataValidationHelper();
 
             // Create data validation for column B (Names)
-            DataValidationConstraint nameConstraint = validationHelper.createFormulaListConstraint("Specification!$A$3:$A$" + categories.size() + 1);
+            DataValidationConstraint nameConstraint = validationHelper.createFormulaListConstraint("Specification!$A$2:$A$" + categories.size() + 1);
             CellRangeAddressList nameAddressList = new CellRangeAddressList(1, 50, 1, 1);
             DataValidation nameValidation = validationHelper.createValidation(nameConstraint, nameAddressList);
 
