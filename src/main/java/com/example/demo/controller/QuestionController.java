@@ -9,6 +9,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -28,6 +29,11 @@ public class QuestionController {
     public ResponseEntity<Resource> downloadTemplate(HttpServletRequest request) {
 
         return questionService.downloadTemplate(request);
+    }
+
+    @PostMapping("/import")
+    public ResponseEntity importExcel(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
+        return ResponseEntity.ok(questionService.importExcel(file, request));
     }
 }
 

@@ -14,7 +14,7 @@ import java.util.List;
 public interface QuestionService {
     ResponseEntity<Resource> downloadTemplate(HttpServletRequest request);
 //
-//    public ImportResponse importExcel(MultipartFile file);
+    public ImportResponse importExcel(MultipartFile file, HttpServletRequest request);
 //
 //    ResponseEntity<Resource> exportStudentList(long id);
 }

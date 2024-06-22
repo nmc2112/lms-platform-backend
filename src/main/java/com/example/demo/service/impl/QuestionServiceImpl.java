@@ -3,14 +3,8 @@ package com.example.demo.service.impl;
 import com.example.demo.dto.ClassroomDTO;
 import com.example.demo.dto.ImportClassroomDTO;
 import com.example.demo.dto.ImportResponse;
-import com.example.demo.entity.Classroom;
-import com.example.demo.entity.QuestionCategory;
-import com.example.demo.entity.StudentClassroom;
-import com.example.demo.entity.User;
-import com.example.demo.repository.ClassroomRepository;
-import com.example.demo.repository.QuestionCategoryRepository;
-import com.example.demo.repository.StudentClassroomRepository;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.entity.*;
+import com.example.demo.repository.*;
 import com.example.demo.service.ClassroomService;
 import com.example.demo.service.QuestionService;
 import com.example.demo.util.Utils;
@@ -41,6 +35,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class QuestionServiceImpl implements QuestionService {
     private final QuestionCategoryRepository questionCategoryRepository;
+    private final QuestionRepository questionRepository;
 //    @Autowired
 //    private JavaMailSender mailSender;
 
@@ -98,117 +93,132 @@ public class QuestionServiceImpl implements QuestionService {
         }
     }
 
-//    @Override
-//    public ImportResponse importExcel(MultipartFile file) {
-//        ImportResponse response = new ImportResponse();
-//        List<String> errors = new ArrayList<>();
-//        try {
-//            InputStream inputStream = file.getInputStream();
-//            Workbook workbook = new XSSFWorkbook(inputStream);
-//            Sheet sheet = workbook.getSheetAt(0);
-//            int startRow = 1; //bỏ qua 1 dòng heading
-//            List<ImportClassroomDTO> rs = new ArrayList<>();
-//            for (int i = startRow; i < sheet.getLastRowNum(); i++) {
-//                ImportClassroomDTO importClassroomDTO = new ImportClassroomDTO();
-//                Row currentRow = sheet.getRow(i);
-//                if (!isRowNotEmpty(currentRow)) break;
-//                Iterator<Cell> cellsInRow = currentRow.iterator();
-//                int cellIdx = 0;
-//                boolean studentNameIsBlank = false;
-//                boolean studentEmailIsBlank = false;
-//                boolean subjectNameIsBlank = false;
-//                boolean teacherNameIsBlank = false;
-//                String inputStudentName, inputStudentEmail = "", inputSubjectName = "", inputTeacherName = "";
-//                for (int j = 0; j < currentRow.getLastCellNum(); j++) {
-//                    Cell currentCell = cellsInRow.next();
-//                    switch (cellIdx) {
-//                        case 0:
-//                            String number = currentCell.getStringCellValue().trim();
-//                            if (!number.isEmpty()&&!Utils.isLong(number)) {
-//                                errors.add("Line " + (i + 1) + ": Invalid number");
-//                            }
-//                            break;
-//                        case 1:
-//                            inputStudentName = currentCell.getStringCellValue().trim();
-//                            if (Utils.isNullOrEmpty(inputStudentName)) {
-//                                errors.add("Line " + (i + 1) + ": Student name is required");
-//                                studentNameIsBlank = true;
-//                            }
-//                            break;
-//                        case 2:
-//                            inputStudentEmail = currentCell.getStringCellValue().trim();
-//                            if (Utils.isNullOrEmpty(inputStudentEmail)) {
-//                                errors.add("Line " + (i + 1) + ": Student email is required");
-//                                studentEmailIsBlank = true;
-//                            }
-//                            break;
-//                        case 3:
-//                            inputSubjectName = currentCell.getStringCellValue().trim();
-//                            if (Utils.isNullOrEmpty(inputSubjectName)) {
-//                                errors.add("Line " + (i + 1) + ": Subject name is required");
-//                                subjectNameIsBlank = true;
-//                            }
-//                            break;
-//                        case 4:
-//                             inputTeacherName = currentCell.getStringCellValue().trim();
-//                            if (Utils.isNullOrEmpty(inputTeacherName)) {
-//                                errors.add("Line " + (i + 1) + ": Teacher name is required");
-//                                teacherNameIsBlank = true;
-//                            }
-//                            break;
-//                        default:
-//                            break;
-//                    }
-//                    cellIdx++;
-//                }
-//                if (!studentNameIsBlank && !studentEmailIsBlank) {
-//                    User student = userRepository.findByEmail(inputStudentEmail);
-//                    if (student == null) {
-//                        errors.add("Line " + (i + 1) + ": Student not found");
-//                    } else {
-//                        importClassroomDTO.setStudent(student);
-//                    }
-//                }
-//                if (!subjectNameIsBlank && !teacherNameIsBlank) {
-//                    Classroom classroom = classroomRepository.findBySubjectNameAndTeacherName(inputSubjectName,inputTeacherName);
-//                    if (classroom == null) {
-//                        errors.add("Line " + (i + 1) + ": Classroom not found");
-//                    } else {
-//                        importClassroomDTO.setClassroom(classroom);
-//                    }
-//                }
-//                rs.add(importClassroomDTO);
-//            }
-//            if (errors.isEmpty()){
-//                List<StudentClassroom> studentClassrooms = rs.stream()
-//                        .map(data -> new StudentClassroom(data.getStudent().getId(), data.getClassroom().getId()))
-//                        .toList();
-//                studentClassroomRepository.saveAll(studentClassrooms);
-//                response.setSuccess(true);
-//                return response;
-//            } else {
-//                response.setSuccess(false);
-//                response.setError(errors);
-//                return response;
-//            }
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-//
-//    private static boolean isRowNotEmpty(Row row) {
-//        if (row == null) {
-//            return false;
-//        }
-//
-//        for (int cellNum = row.getFirstCellNum(); cellNum <= row.getLastCellNum(); cellNum++) {
-//            if (row.getCell(cellNum) != null && !row.getCell(cellNum).toString().trim().isEmpty()) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-//
+    @Override
+    public ImportResponse importExcel(MultipartFile file, HttpServletRequest request) {
+        String userId = request.getParameter("userId");
+        ImportResponse response = new ImportResponse();
+        List<String> errors = new ArrayList<>();
+        try {
+            InputStream inputStream = file.getInputStream();
+            Workbook workbook = new XSSFWorkbook(inputStream);
+            Sheet sheet = workbook.getSheetAt(0);
+            int startRow = 1; //bỏ qua 1 dòng heading
+            List<Question> rs = new ArrayList<>();
+            for (int i = startRow; i < sheet.getLastRowNum(); i++) {
+                Question questionDTO = new Question();
+                Row currentRow = sheet.getRow(i);
+
+                if (!isRowNotEmpty(currentRow)) break;
+                Iterator<Cell> cellsInRow = currentRow.iterator();
+                int cellIdx = 0;
+                boolean categoryIsBlank = false;
+                boolean contentIsBlank = false;
+                boolean optionsIsBlank = false;
+                boolean correctOptionIsBlank = false;
+                String categoryName = "", content = "", options = "", correctOptions = "";
+                for (int j = 0; j < currentRow.getLastCellNum(); j++) {
+                    Cell currentCell = cellsInRow.next();
+
+                    switch (cellIdx) {
+                        case 0:
+                            String number = currentCell.getStringCellValue().trim();
+                            if (!number.isEmpty()&&!Utils.isLong(number)) {
+                                errors.add("Line " + (i + 1) + ": Invalid number");
+                            }
+                            break;
+                        case 1:
+                            categoryName = currentCell.getStringCellValue().trim();
+                            if (Utils.isNullOrEmpty(categoryName)) {
+                                errors.add("Line " + (i + 1) + ": Category name is required");
+                                categoryIsBlank= true;
+                            }
+                            break;
+                        case 2:
+                            content = currentCell.getStringCellValue().trim();
+                            if (Utils.isNullOrEmpty(content)) {
+                                errors.add("Line " + (i + 1) + ": Content is required");
+                                contentIsBlank = true;
+                            } else {
+                                questionDTO.setContent(content);
+                            }
+                            break;
+                        case 3:
+                            options = currentCell.getStringCellValue().trim();
+                            if (Utils.isNullOrEmpty(options)) {
+                                errors.add("Line " + (i + 1) + ": Options is required");
+                                optionsIsBlank = true;
+                            } else {
+                                String[] optionsList = options.split("||");
+                                if (optionsList.length <= 1){
+                                    errors.add("Line " + (i + 1) + ": Options should be more than one");
+                                }else{
+                                    StringBuilder optionString = new StringBuilder("[");
+                                    for(String option : optionsList){
+                                        optionString.append("\"").append(option).append("\",");
+                                    }
+                                    optionString.append("]");
+                                    questionDTO.setOptions(optionString.toString());
+                                }
+                            }
+                            break;
+                        case 4:
+                            correctOptions = currentCell.getStringCellValue().trim();
+                            if (Utils.isNullOrEmpty(correctOptions)) {
+                                errors.add("Line " + (i + 1) + ": Correct options is required");
+                                correctOptionIsBlank = true;
+                            }
+                            else {
+                                try{
+                                    Integer num = Integer.parseInt(correctOptions);
+                                    questionDTO.setCorrectOption(num);
+                                }catch (Exception exception){
+                                    errors.add("Line " + (i + 1) + ": Invalid number");
+                                }
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                    cellIdx++;
+                }
+                if (!categoryIsBlank) {
+                    QuestionCategory questionCategory = questionCategoryRepository.findByCategoryName(categoryName, userId);
+                    if (questionCategory == null) {
+                        errors.add("Line " + (i + 1) + ": Category not found");
+                    } else {
+                        questionDTO.setQuesCategoryId(questionCategory.getId());
+                    }
+                }
+
+                rs.add(questionDTO);
+            }
+            if (errors.isEmpty()){
+                questionRepository.saveAll(rs);
+                response.setSuccess(true);
+                return response;
+            } else {
+                response.setSuccess(false);
+                response.setError(errors);
+                return response;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static boolean isRowNotEmpty(Row row) {
+        if (row == null) {
+            return false;
+        }
+
+        for (int cellNum = row.getFirstCellNum(); cellNum <= row.getLastCellNum(); cellNum++) {
+            if (row.getCell(cellNum) != null && !row.getCell(cellNum).toString().trim().isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 //    @Override
 //    public ResponseEntity<Resource> exportStudentList(long id) {
 //        ClassroomDTO classroomDTO = classroomRepository.findByIdAsDTO(id);

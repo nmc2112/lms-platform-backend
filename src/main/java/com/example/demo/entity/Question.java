@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = "quesCategory")
+@Table(name = "question")
 @Getter
 @Setter
 public class Question {
