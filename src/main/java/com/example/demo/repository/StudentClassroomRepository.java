@@ -14,4 +14,8 @@ import java.util.List;
 public interface StudentClassroomRepository extends JpaRepository<StudentClassroom, Long> {
     @Query(value = "select studentId from student_classroom where classroomId=:classroomId", nativeQuery = true)
     List<Long> findStudentsByClassroomId(@Param("classroomId") Long classroomId);
+
+
+    @Query(value = "select classroomId from student_classroom left join user on user.id = student_classroom.studentId  where user.userClerkId=:userId", nativeQuery = true)
+    List<Long> findClassroomsByStudentId(@Param("userId") String userId);
 }

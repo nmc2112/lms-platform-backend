@@ -13,6 +13,7 @@ import com.example.demo.service.ClassroomService;
 import com.example.demo.util.Utils;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddressList;
@@ -367,5 +368,12 @@ public class ClassroomServiceImpl implements ClassroomService {
             // Handle error
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @Override
+    public List<ClassroomDTO> findAllByTeacherId(HttpServletRequest request) {
+        String userId = request.getHeader("Userid");
+        return classroomRepository.findAllByTeacherIdAsDTO(userId);
+
     }
 }

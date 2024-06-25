@@ -13,8 +13,7 @@ import java.util.UUID;
 @Setter
 public class QuestionCategory {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    private String id;
 
     @Column(name = "name")
     private String name;

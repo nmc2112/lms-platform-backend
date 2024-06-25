@@ -7,6 +7,7 @@ import com.example.demo.service.ClassroomService;
 import com.example.demo.service.impl.GoogleCalendarService;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
@@ -36,6 +37,11 @@ public class ClassroomController {
     @GetMapping("/get-all")
     public ResponseEntity getAllClassrooms() {
         return ResponseEntity.ok(classroomService.findAll());
+    }
+
+    @GetMapping("/get-all-by-teacherId")
+    public ResponseEntity getAllClassroomsByTeacherId(HttpServletRequest request) {
+        return ResponseEntity.ok(classroomService.findAllByTeacherId(request));
     }
 
 

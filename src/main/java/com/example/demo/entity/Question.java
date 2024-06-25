@@ -3,6 +3,7 @@ package com.example.demo.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.util.Date;
 import java.util.UUID;
@@ -13,23 +14,25 @@ import java.util.UUID;
 @Setter
 public class Question {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+//    @GeneratedValue(generator = "UUID")
+//    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "id", updatable = false, nullable = false)
+    private String id;
 
     @Column(name = "content")
     private String content;
 
-    @Column(name = "options")
+    @Column(columnDefinition = "json", name = "options")
     private String options;
 
     @Column(name = "chapterId")
-    private UUID chapterId;
+    private String chapterId;
 
     @Column(name = "correctOption")
     private Integer correctOption;
 
     @Column(name = "quesCategoryId")
-    private UUID quesCategoryId;
+    private String quesCategoryId;
 
 
 }

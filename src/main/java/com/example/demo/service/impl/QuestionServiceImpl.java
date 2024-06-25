@@ -95,7 +95,7 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public ImportResponse importExcel(MultipartFile file, HttpServletRequest request) {
-        String userId = request.getParameter("userId");
+        String userId = request.getHeader("userId");
         ImportResponse response = new ImportResponse();
         List<String> errors = new ArrayList<>();
         try {
@@ -122,7 +122,7 @@ public class QuestionServiceImpl implements QuestionService {
                     switch (cellIdx) {
                         case 0:
                             String number = currentCell.getStringCellValue().trim();
-                            if (!number.isEmpty()&&!Utils.isLong(number)) {
+                            if (!number.isEmpty() && !Utils.isLong(number)) {
                                 errors.add("Line " + (i + 1) + ": Invalid number");
                             }
                             break;
@@ -130,7 +130,7 @@ public class QuestionServiceImpl implements QuestionService {
                             categoryName = currentCell.getStringCellValue().trim();
                             if (Utils.isNullOrEmpty(categoryName)) {
                                 errors.add("Line " + (i + 1) + ": Category name is required");
-                                categoryIsBlank= true;
+                                categoryIsBlank = true;
                             }
                             break;
                         case 2:
@@ -143,36 +143,39 @@ public class QuestionServiceImpl implements QuestionService {
                             }
                             break;
                         case 3:
-                            options = currentCell.getStringCellValue().trim();
+//                            options = currentCell.getStringCellValue().trim();
+                            DataFormatter formatter = new DataFormatter();
+                            FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+                            options = formatter.formatCellValue(currentCell, evaluator).trim();
                             if (Utils.isNullOrEmpty(options)) {
                                 errors.add("Line " + (i + 1) + ": Options is required");
                                 optionsIsBlank = true;
                             } else {
-                                String[] optionsList = options.split("||");
-                                if (optionsList.length <= 1){
+                                String[] optionsList = options.split("\\|\\|");
+                                if (optionsList.length <= 1) {
                                     errors.add("Line " + (i + 1) + ": Options should be more than one");
-                                }else{
+                                } else {
                                     StringBuilder optionString = new StringBuilder("[");
-                                    for(String option : optionsList){
-                                        optionString.append("\"").append(option).append("\",");
+                                    for (String option : optionsList) {
+                                        optionString.append("\"").append(option.trim()).append("\",");
                                     }
+                                    optionString = new StringBuilder(optionString.substring(0, optionString.length() - 1));
                                     optionString.append("]");
                                     questionDTO.setOptions(optionString.toString());
                                 }
                             }
                             break;
                         case 4:
-                            correctOptions = currentCell.getStringCellValue().trim();
+                            correctOptions = this.getCellText(currentCell);
                             if (Utils.isNullOrEmpty(correctOptions)) {
                                 errors.add("Line " + (i + 1) + ": Correct options is required");
                                 correctOptionIsBlank = true;
-                            }
-                            else {
-                                try{
-                                    Integer num = Integer.parseInt(correctOptions);
+                            } else {
+                                try {
+                                    Integer num = Integer.parseInt(correctOptions.split("\\.")[0]);
                                     questionDTO.setCorrectOption(num);
-                                }catch (Exception exception){
-                                    errors.add("Line " + (i + 1) + ": Invalid number");
+                                } catch (Exception exception) {
+                                    errors.add("Line " + (i + 1) + ": Invalid option number");
                                 }
                             }
                             break;
@@ -190,9 +193,14 @@ public class QuestionServiceImpl implements QuestionService {
                     }
                 }
 
+                UUID randomUUID = UUID.randomUUID();
+                String uuidString = randomUUID.toString();
+
+                questionDTO.setId(uuidString);
+                questionDTO.setChapterId("");
                 rs.add(questionDTO);
             }
-            if (errors.isEmpty()){
+            if (errors.isEmpty()) {
                 questionRepository.saveAll(rs);
                 response.setSuccess(true);
                 return response;
@@ -219,7 +227,7 @@ public class QuestionServiceImpl implements QuestionService {
         return false;
     }
 
-//    @Override
+    //    @Override
 //    public ResponseEntity<Resource> exportStudentList(long id) {
 //        ClassroomDTO classroomDTO = classroomRepository.findByIdAsDTO(id);
 //        List<Long> studentIds = studentClassroomRepository.findStudentsByClassroomId(id);
@@ -256,4 +264,13 @@ public class QuestionServiceImpl implements QuestionService {
 //            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 //        }
 //    }
+    private String getCellText(Cell cell) {
+        if (cell == null) return "";
+
+        DataFormatter formatter = new DataFormatter();
+        FormulaEvaluator evaluator = cell.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
+
+        // Use the DataFormatter and FormulaEvaluator to handle all types
+        return formatter.formatCellValue(cell, evaluator).trim();
+    }
 }

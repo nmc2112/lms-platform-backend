@@ -4,6 +4,7 @@ import com.example.demo.dto.ClassroomDTO;
 import com.example.demo.dto.ImportResponse;
 import com.example.demo.entity.Classroom;
 import com.example.demo.entity.User;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,4 +26,6 @@ public interface ClassroomService {
     public ImportResponse importExcel(MultipartFile file);
 
     ResponseEntity<Resource> exportStudentList(long id);
+
+    public List<ClassroomDTO> findAllByTeacherId(HttpServletRequest request);
 }
