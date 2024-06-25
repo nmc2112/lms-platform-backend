@@ -1,6 +1,6 @@
 package com.example.demo.entity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
@@ -29,7 +29,7 @@ public class Assignment {
     private String userId;
 
     @Column(name = "classroomId")
-    private String classroomId;
+    private Long classroomId;
 
     @Column(name = "quesCategoryId")
     private String quesCategoryId;
