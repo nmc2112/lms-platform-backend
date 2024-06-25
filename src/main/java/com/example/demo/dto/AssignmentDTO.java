@@ -24,7 +24,7 @@ public class AssignmentDTO {
 
     private String userId;
 
-    private String classroomId;
+    private Long classroomId;
 
     private String classroomSubjectName;
 
