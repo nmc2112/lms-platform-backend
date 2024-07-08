@@ -62,7 +62,7 @@ public class ClassroomServiceImpl implements ClassroomService {
             int dayOfWeek = calendar.get(java.util.Calendar.DAY_OF_WEEK);
 
             // Map Java Calendar day of week to RRULE BYDAY format
-            String[] daysOfWeek = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satuday"};
+            String[] daysOfWeek = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
             String byDay = daysOfWeek[dayOfWeek - 1];
             classroom.setDayOfWeek(byDay);
 
