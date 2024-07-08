@@ -52,9 +52,20 @@ public class ClassroomServiceImpl implements ClassroomService {
     @Override
     public Classroom save(Classroom classroom) throws Exception {
         if (classroom.getId() == null) {
-            Event e = googleCalendarService.createGoogleMeetEvent(new DateTime(classroom.getStartTime()), new DateTime(classroom.getEndTime()));
+            Event e = googleCalendarService.createGoogleMeetEvent(new DateTime(classroom.getStartTime()), new DateTime(classroom.getEndTime()), new DateTime(classroom.getUntil()));
             classroom.setMeetingLink(e.getHangoutLink());
             classroom.setTotalStudents(0L);
+            classroom.setFirstDay(classroom.getStartTime());
+            java.util.Calendar calendar = java.util.Calendar.getInstance();
+            DateTime startTimeGMT = googleCalendarService.convertToGMTPlus7(new DateTime(classroom.getStartTime()));
+            calendar.setTime(new Date(startTimeGMT.getValue()));
+            int dayOfWeek = calendar.get(java.util.Calendar.DAY_OF_WEEK);
+
+            // Map Java Calendar day of week to RRULE BYDAY format
+            String[] daysOfWeek = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satuday"};
+            String byDay = daysOfWeek[dayOfWeek - 1];
+            classroom.setDayOfWeek(byDay);
+
             User teacher = userRepository.findById(classroom.getTeacherId()).orElse(new User());
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
             this.sendSimpleEmail(teacher.getEmail(), "LMS Education notification for teacher", "You has been assigned to teach: " + classroom.getSubjectName() + ".\nYour classroom meeting link: " + classroom.getMeetingLink() + "\nStart at:" + formatter.format(classroom.getStartTime()) + "\nEnd at:" + formatter.format(classroom.getEndTime()));
@@ -64,7 +75,7 @@ public class ClassroomServiceImpl implements ClassroomService {
             if (classroomOptional.isPresent()) {
                 //neu thoi gian bat dau hoac ket thuc thay doi -> generate lai link gg meet
                 if (classroom.getStartTime() != classroomOptional.get().getStartTime() || classroom.getEndTime() != classroomOptional.get().getEndTime()) {
-                    Event e = googleCalendarService.createGoogleMeetEvent(new DateTime(classroom.getStartTime()), new DateTime(classroom.getEndTime()));
+                    Event e = googleCalendarService.createGoogleMeetEvent(new DateTime(classroom.getStartTime()), new DateTime(classroom.getEndTime()), new DateTime(classroom.getUntil()));
                     classroomOptional.get().setMeetingLink(e.getHangoutLink());
                 }
                 //set lai thuoc tinh update

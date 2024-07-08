@@ -56,16 +56,16 @@ public class ClassroomController {
         return ResponseEntity.ok(classroomService.save(classroom));
     }
 
-    @GetMapping("/createGoogleMeet")
-    public String createGoogleMeet() {
-        try {
-            Event e = googleCalendarService.createGoogleMeetEvent(new DateTime(System.currentTimeMillis()),new DateTime(System.currentTimeMillis()+3600000));
-            return "Google Meet link created: " + e.getHangoutLink();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Failed to create event.";
-        }
-    }
+//    @GetMapping("/createGoogleMeet")
+//    public String createGoogleMeet() {
+//        try {
+//            Event e = googleCalendarService.createGoogleMeetEvent(new DateTime(System.currentTimeMillis()),new DateTime(System.currentTimeMillis()+3600000));
+//            return "Google Meet link created: " + e.getHangoutLink();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return "Failed to create event.";
+//        }
+//    }
 
     @GetMapping("/sendEmail")
     public String sendEmail(@RequestParam String to, @RequestParam String subject, @RequestParam String text) {

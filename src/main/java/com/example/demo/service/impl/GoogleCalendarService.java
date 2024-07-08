@@ -18,9 +18,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service
 public class GoogleCalendarService {
@@ -46,7 +46,10 @@ public class GoogleCalendarService {
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
 
-    public Event createGoogleMeetEvent(DateTime startDateTime, DateTime endDateTime) throws Exception {
+    public Event createGoogleMeetEvent(DateTime startDateTime, DateTime endDateTime, DateTime endRecurrenceDate) throws Exception {
+        startDateTime = this.convertToGMTPlus7(startDateTime);
+        endDateTime = this.convertToGMTPlus7(endDateTime);
+        endRecurrenceDate = convertToGMTPlus7(endRecurrenceDate);
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         Calendar service = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
                 .setApplicationName(APPLICATION_NAME)
@@ -57,7 +60,7 @@ public class GoogleCalendarService {
                 .setDescription("A Google Meet event created programmatically");
         EventDateTime start = new EventDateTime()
                 .setDateTime(startDateTime)
-                .setTimeZone("America/Los_Angeles");
+                .setTimeZone("Asia/Ho_Chi_Minh");
         event.setStart(start);
 
         ConferenceData conferenceData = new ConferenceData();
@@ -73,7 +76,7 @@ public class GoogleCalendarService {
 
         EventDateTime end = new EventDateTime()
                 .setDateTime(endDateTime)
-                .setTimeZone("America/Los_Angeles");
+                .setTimeZone("Asia/Ho_Chi_Minh");
         event.setEnd(end);
 
         Event.Reminders reminders = new Event.Reminders()
@@ -82,6 +85,25 @@ public class GoogleCalendarService {
                         new EventReminder().setMethod("email").setMinutes(24 * 60),
                         new EventReminder().setMethod("popup").setMinutes(10)
                 ));
+        // Determine the day of the week from startDateTime
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+        calendar.setTime(new Date(startDateTime.getValue()));
+        int dayOfWeek = calendar.get(java.util.Calendar.DAY_OF_WEEK);
+
+        // Map Java Calendar day of week to RRULE BYDAY format
+        String[] daysOfWeek = {"SU", "MO", "TU", "WE", "TH", "FR", "SA"};
+        String byDay = daysOfWeek[dayOfWeek - 1]; // Java Calendar's week starts with Sunday (1)
+
+        // Format the end recurrence date to the required format
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String until = dateFormat.format(new Date(endRecurrenceDate.getValue()));
+
+
+        // Set the recurrence rule based on the start day of the week
+        event.setRecurrence(Collections.singletonList("RRULE:FREQ=WEEKLY;BYDAY=" + byDay + ";UNTIL=" + until));
+
+
         event.setReminders(reminders);
 
         Event createdEvent = service.events().insert("primary", event)
@@ -92,6 +114,18 @@ public class GoogleCalendarService {
         System.out.printf("Event created: %s\n", createdEvent.getHtmlLink());
 
         return createdEvent;
+    }
+
+    public static DateTime convertToGMTPlus7(DateTime inputDateTime) {
+        // Create a calendar instance and set the time to the input DateTime
+        java.util.Calendar calendar = java.util.Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendar.setTimeInMillis(inputDateTime.getValue());
+
+        // Subtract 7 hours from the time
+        calendar.add(java.util.Calendar.HOUR_OF_DAY, -7);
+
+        // Create a new DateTime object with the adjusted time
+        return new DateTime(calendar.getTimeInMillis());
     }
 }
 
