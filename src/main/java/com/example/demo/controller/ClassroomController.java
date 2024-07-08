@@ -44,6 +44,11 @@ public class ClassroomController {
         return ResponseEntity.ok(classroomService.findAllByTeacherId(request));
     }
 
+    @GetMapping("/get-all-by-studentId")
+    public ResponseEntity getAllClassroomsByStudentId(HttpServletRequest request) {
+        return ResponseEntity.ok(classroomService.findAllByStudentId(request));
+    }
+
 
     @PostMapping("/save")
     public ResponseEntity getAllClassrooms(@RequestBody Classroom classroom) throws Exception {

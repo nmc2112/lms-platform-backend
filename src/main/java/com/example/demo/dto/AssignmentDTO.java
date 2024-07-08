@@ -18,11 +18,25 @@ public class AssignmentDTO {
 
     private String name;
 
-    private int duration;
+    private Long duration;
 
-    private int numberOfQuestions;
+    private Long numberOfQuestions;
 
     private String userId;
+
+    public AssignmentDTO(Long id, String name, Long duration, Long numberOfQuestions, String userId, Long classroomId, String classroomSubjectName, String quesCategoryId, String quesCategoryName, Date createdAt, Date updatedAt) {
+        this.id = id;
+        this.name = name;
+        this.duration = duration;
+        this.numberOfQuestions = numberOfQuestions;
+        this.userId = userId;
+        this.classroomId = classroomId;
+        this.classroomSubjectName = classroomSubjectName;
+        this.quesCategoryId = quesCategoryId;
+        this.quesCategoryName = quesCategoryName;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 
     private Long classroomId;
 
@@ -34,4 +48,8 @@ public class AssignmentDTO {
     private Date createdAt;
 
     private Date updatedAt;
+
+    private Long result;
+
+    private Long status;
 }

@@ -55,8 +55,6 @@ public class GoogleCalendarService {
         Event event = new Event()
                 .setSummary("Google Meet Event")
                 .setDescription("A Google Meet event created programmatically");
-
-//        DateTime startDateTime = new DateTime(System.currentTimeMillis());
         EventDateTime start = new EventDateTime()
                 .setDateTime(startDateTime)
                 .setTimeZone("America/Los_Angeles");
@@ -73,7 +71,6 @@ public class GoogleCalendarService {
 
         event.setConferenceData(conferenceData);
 
-//        DateTime endDateTime = new DateTime(System.currentTimeMillis() + 3600000);
         EventDateTime end = new EventDateTime()
                 .setDateTime(endDateTime)
                 .setTimeZone("America/Los_Angeles");

@@ -20,10 +20,10 @@ public class Assignment {
     private String name;
 
     @Column(name = "duration")
-    private int duration;
+    private Long duration;
 
     @Column(name = "numberOfQuestions")
-    private int numberOfQuestions;
+    private Long numberOfQuestions;
 
     @Column(name = "userId")
     private String userId;

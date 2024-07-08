@@ -1,5 +1,6 @@
 package com.example.demo.repository;
 
+import com.example.demo.dto.AssignmentDTO;
 import com.example.demo.entity.Question;
 import com.example.demo.entity.QuestionCategory;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -17,7 +18,10 @@ import java.util.UUID;
 @EntityScan(basePackages = "com.example.demo.entity")
 public interface QuestionRepository extends JpaRepository<Question, String> {
 
-
+    @Query("SELECT q FROM Question q " +
+            "left JOIN Assignment a ON a.quesCategoryId = q.quesCategoryId " +
+            "WHERE a.id = :assignmentId ORDER BY RAND() LIMIT :numberOfQuestions")
+    List<Question> findQuestionsByAssignment(@Param("assignmentId") Long assignmentId, @Param("numberOfQuestions") Long numberOfQuestions);
 
 
 }

@@ -1,6 +1,9 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.AssignmentStudentRequest;
+import com.example.demo.entity.AssignmentStudent;
 import com.example.demo.entity.Classroom;
+import com.example.demo.entity.User;
 import com.example.demo.repository.ClassroomRepository;
 import com.example.demo.service.AssignmentService;
 import com.example.demo.service.ClassroomService;
@@ -27,6 +30,16 @@ public class AssignmentController {
     @GetMapping("/get-assignment-by-studentId")
     public ResponseEntity getAllAssignmentByStudentId(HttpServletRequest request) {
         return ResponseEntity.ok(assignmentService.findAllByStudentId(request));
+    }
+
+    @GetMapping("/get-assignment-by-id/{id}")
+    public ResponseEntity getAllAssignmentById(@PathVariable("id")  Long id, HttpServletRequest request) {
+        return ResponseEntity.ok(assignmentService.findById(id, request));
+    }
+
+    @PostMapping("/save-assignment")
+    public ResponseEntity saveAssignment(@RequestBody AssignmentStudentRequest assignmentStudent) {
+        return ResponseEntity.ok(assignmentService.saveAssignmentByStudent(assignmentStudent));
     }
 
 }

@@ -28,4 +28,6 @@ public interface ClassroomService {
     ResponseEntity<Resource> exportStudentList(long id);
 
     public List<ClassroomDTO> findAllByTeacherId(HttpServletRequest request);
+
+    public List<ClassroomDTO> findAllByStudentId(HttpServletRequest request);
 }

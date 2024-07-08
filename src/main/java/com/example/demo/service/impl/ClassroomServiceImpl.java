@@ -376,4 +376,10 @@ public class ClassroomServiceImpl implements ClassroomService {
         return classroomRepository.findAllByTeacherIdAsDTO(userId);
 
     }
+
+    @Override
+    public List<ClassroomDTO> findAllByStudentId(HttpServletRequest request) {
+        String userId = request.getHeader("Userid");
+        return classroomRepository.findAllByStudentIdAsDTO(userId);
+    }
 }

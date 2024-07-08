@@ -1,16 +1,8 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.dto.AssignmentDTO;
-import com.example.demo.dto.ClassroomDTO;
-import com.example.demo.dto.ImportClassroomDTO;
-import com.example.demo.dto.ImportResponse;
-import com.example.demo.entity.Classroom;
-import com.example.demo.entity.StudentClassroom;
-import com.example.demo.entity.User;
-import com.example.demo.repository.AssignmentRepository;
-import com.example.demo.repository.ClassroomRepository;
-import com.example.demo.repository.StudentClassroomRepository;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.dto.*;
+import com.example.demo.entity.*;
+import com.example.demo.repository.*;
 import com.example.demo.service.AssignmentService;
 import com.example.demo.service.ClassroomService;
 import com.example.demo.util.Utils;
@@ -41,18 +33,56 @@ import java.util.*;
 @RequiredArgsConstructor
 public class AssignmentServiceImpl implements AssignmentService {
     private final AssignmentRepository assignmentRepository;
+    private final AssignmentStudentRepository assignmentStudentRepository;
     private final UserRepository userRepository;
     private final GoogleCalendarService googleCalendarService;
     private final StudentClassroomRepository studentClassroomRepository;
+    private final QuestionRepository questionRepository;
 
     @Override
     public List<AssignmentDTO> findAllByStudentId(HttpServletRequest request) {
         String userId = request.getHeader("userId");
         List<Long> classroomIds = studentClassroomRepository.findClassroomsByStudentId(userId);
-        return assignmentRepository.findAllByClassroomIds(classroomIds);
+        List<AssignmentDTO> assignmentDTOList =  assignmentRepository.findAllByClassroomIds(classroomIds);
+        assignmentDTOList.forEach(assignmentDTO -> {
+            AssignmentStudent assignmentStudent = assignmentStudentRepository.findByAssignmentIdAndStudentId(assignmentDTO.getId(), userId);
+            if(assignmentStudent != null) {
+                assignmentDTO.setResult(assignmentStudent.getResult());
+                assignmentDTO.setStatus(assignmentStudent.getStatus());
+            }
+            else{
+                assignmentDTO.setStatus(0L);
+            }
+        });
+        return assignmentDTOList;
+    }
+
+    @Override
+    public AssignmentStudentDTO findById(Long id, HttpServletRequest request) {
+        AssignmentStudentDTO assignmentStudentDTO = new AssignmentStudentDTO();
+        Assignment assignment = assignmentRepository.findById(id).orElse(null);
+        assignmentStudentDTO.setQuestions(questionRepository.findQuestionsByAssignment(assignment.getId(), assignment.getNumberOfQuestions()));
+        assignmentStudentDTO.setDuration(assignment.getDuration());
+        assignmentStudentDTO.setTotalQuestions(assignment.getNumberOfQuestions());
+
+        return assignmentStudentDTO;
+    }
+
+    @Override
+    public AssignmentStudent saveAssignmentByStudent(AssignmentStudentRequest request) {
+        AssignmentStudent assignmentStudent = new AssignmentStudent();
+        assignmentStudent.setAssignmentId(request.getAssignmentId());
+        assignmentStudent.setStatus(1L);
+        assignmentStudent.setResult(request.getResult());
+
+        User user = userRepository.findByUserClerkId(request.getStudentId());
+        assignmentStudent.setStudentId(user.getId());
+
+        return assignmentStudentRepository.save(assignmentStudent);
     }
 //    @Autowired
 //    private JavaMailSender mailSender;
+
 
 
 }
