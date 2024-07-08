@@ -17,5 +17,7 @@ public interface AssignmentStudentRepository extends JpaRepository<AssignmentStu
             " LEFT JOIN User u ON u.id = as1.studentId "+
             " WHERE as1.assignmentId = :assignmentId AND u.userClerkId = :studentId " )
     AssignmentStudent findByAssignmentIdAndStudentId(@Param("assignmentId") Long assignmentId, @Param("studentId")  String studentId);
-
+//
+//    @Query("SELECT as1 FROM AssignmentStudent as1 WHERE as1.studentId")
+//    AssignmentStudent findByStudent(@Param("assignmentId") Long assignmentId);
 }

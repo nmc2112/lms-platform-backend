@@ -3,12 +3,8 @@ package com.example.demo.service.impl;
 import com.example.demo.dto.ClassroomDTO;
 import com.example.demo.dto.ImportClassroomDTO;
 import com.example.demo.dto.ImportResponse;
-import com.example.demo.entity.Classroom;
-import com.example.demo.entity.StudentClassroom;
-import com.example.demo.entity.User;
-import com.example.demo.repository.ClassroomRepository;
-import com.example.demo.repository.StudentClassroomRepository;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.entity.*;
+import com.example.demo.repository.*;
 import com.example.demo.service.ClassroomService;
 import com.example.demo.util.Utils;
 import com.google.api.client.util.DateTime;
@@ -33,6 +29,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +38,8 @@ public class ClassroomServiceImpl implements ClassroomService {
     private final UserRepository userRepository;
     private final GoogleCalendarService googleCalendarService;
     private final StudentClassroomRepository studentClassroomRepository;
+    private final AssignmentRepository assignmentRepository;
+    private final AssignmentStudentRepository assignmentStudentRepository;
 //    @Autowired
 //    private JavaMailSender mailSender;
 
@@ -345,13 +344,19 @@ public class ClassroomServiceImpl implements ClassroomService {
 
     @Override
     public ResponseEntity<Resource> exportStudentList(long id) {
-        ClassroomDTO classroomDTO = classroomRepository.findByIdAsDTO(id);
+//        ClassroomDTO classroomDTO = classroomRepository.findByIdAsDTO(id);
         List<Long> studentIds = studentClassroomRepository.findStudentsByClassroomId(id);
         List<User> students = userRepository.findAllById(studentIds);
         try (InputStream is = new ClassPathResource("excel/studentListByClassroom.xlsx").getInputStream();
              Workbook workbook = new XSSFWorkbook(is)) {
             Sheet specificationSheet = workbook.getSheetAt(0);
-            // Creating header row
+            List<Assignment> assignments = assignmentRepository.findAllByClassroomId(id);
+            // Creating header row - skip 3 first static cells
+            Row headerRow = specificationSheet.getRow(0);
+            AtomicInteger index = new AtomicInteger(0);
+            assignments.forEach(as -> {
+                headerRow.createCell(index.getAndIncrement() + 3).setCellValue(as.getName());
+            });
             // Populating the data rows
             int rowNum = 1;
             for (User student : students) {
@@ -359,6 +364,15 @@ public class ClassroomServiceImpl implements ClassroomService {
                 row.createCell(0).setCellValue(rowNum++);
                 row.createCell(1).setCellValue(student.getName());
                 row.createCell(2).setCellValue(student.getEmail());
+                AtomicInteger i = new AtomicInteger(0);
+                assignments.forEach(as -> {
+                    AssignmentStudent assignmentStudent = assignmentStudentRepository.findByAssignmentIdAndStudentId(as.getId(),student.getUserClerkId());
+                    if (assignmentStudent == null) {
+                        row.createCell(i.getAndIncrement() + 3);
+                    } else {
+                        row.createCell(i.getAndIncrement() + 3).setCellValue(assignmentStudent.getResult());
+                    }
+                });
             }
 
             // Write the output to a file
@@ -372,7 +386,7 @@ public class ClassroomServiceImpl implements ClassroomService {
                 // Prepare response with the file
                 return ResponseEntity.ok()
                         .contentType(org.springframework.http.MediaType.parseMediaType(contentType))
-                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"students.xlsx\"")
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"studentsExport.xlsx\"")
                         .body(resource);
             }
         } catch (Exception e) {
@@ -391,6 +405,6 @@ public class ClassroomServiceImpl implements ClassroomService {
     @Override
     public List<ClassroomDTO> findAllByStudentId(HttpServletRequest request) {
         String userId = request.getHeader("Userid");
-        return classroomRepository.findAllByStudentIdAsDTO(userId);
+        return studentClassroomRepository.findAllByStudentIdAsDTO(userId);
     }
 }
