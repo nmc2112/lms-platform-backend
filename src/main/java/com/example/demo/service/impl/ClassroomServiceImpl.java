@@ -368,7 +368,6 @@ public class ClassroomServiceImpl implements ClassroomService {
             headerCellStyle.setBorderRight(BorderStyle.THIN);
             //data
             CellStyle cellStyle = workbook.createCellStyle();
-            cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
             cellStyle.setBorderBottom(BorderStyle.THIN);
             cellStyle.setBorderTop(BorderStyle.THIN);
             cellStyle.setBorderLeft(BorderStyle.THIN);
