@@ -70,9 +70,10 @@ public class UserServiceImpl implements UserService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<UserClerkDTO[]> response = restTemplate.exchange(clerkApiUrl, HttpMethod.GET, entity, UserClerkDTO[].class);
         List<User> rs = new ArrayList<>();
-        userRepository.deleteUsersFromClerk();
+//        userRepository.deleteUsersFromClerk();
         for (UserClerkDTO userClerkDTO : response.getBody()) {
-            User user = new User();
+            User user = userRepository.findByUserClerkId(userClerkDTO.getId());
+            if (user == null) user = new User();
             user.setUsername(userClerkDTO.getUsername()==null?userClerkDTO.getEmail_addresses().get(0).getEmail_address():userClerkDTO.getUsername());
             user.setPassword(userClerkDTO.getPassword()==null?"":userClerkDTO.getPassword());
             user.setEmail(userClerkDTO.getEmail_addresses().get(0).getEmail_address());
