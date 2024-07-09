@@ -20,9 +20,9 @@ public interface StudentClassroomRepository extends JpaRepository<StudentClassro
     List<Long> findClassroomsByStudentId(@Param("userId") String userId);
 
     @Query(value = "SELECT new com.example.demo.dto.ClassroomDTO(c.id, c.subjectName, c.totalStudents, c.teacherId, u.name, c.startTime, c.endTime, c.meetingLink, c.description, c.imgUrl) " +
-            "FROM student_classroom s " +
-            "left JOIN user u ON s.studentId = u.id " +
-            "left JOIN classroom c ON c.id = s.classroomId " +
-            "WHERE u.userClerkId = :userId",nativeQuery = true)
+            "FROM Classroom c " +
+            "left JOIN StudentClassroom s ON c.id = s.classroomId " +
+            "left JOIN User u ON s.studentId = u.id " +
+            "WHERE u.userClerkId = :userId")
     List<ClassroomDTO> findAllByStudentIdAsDTO(@Param("userId") String userId);
 }
