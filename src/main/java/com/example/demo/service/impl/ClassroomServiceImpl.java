@@ -434,4 +434,9 @@ public class ClassroomServiceImpl implements ClassroomService {
         String userId = request.getHeader("Userid");
         return studentClassroomRepository.findAllByStudentIdAsDTO(userId);
     }
+
+    @Override
+    public List<User> listAllStudentsToAdd(Long id) {
+        return userRepository.listAllStudentsToAddToClassroom(id);
+    }
 }

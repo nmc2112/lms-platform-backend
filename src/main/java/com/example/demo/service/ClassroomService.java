@@ -30,4 +30,6 @@ public interface ClassroomService {
     public List<ClassroomDTO> findAllByTeacherId(HttpServletRequest request);
 
     public List<ClassroomDTO> findAllByStudentId(HttpServletRequest request);
+
+    List<User> listAllStudentsToAdd(Long classroomId);
 }

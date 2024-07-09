@@ -36,4 +36,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     User findByName(String name);
     User findByEmail(String email);
+
+    @Query(value = "select * from user where user.id not in " +
+            "(select studentId from student_classroom where classroomId = :classroomId)",nativeQuery = true)
+    public List<User> listAllStudentsToAddToClassroom(@Param("classroomId") Long classroomId);
 }

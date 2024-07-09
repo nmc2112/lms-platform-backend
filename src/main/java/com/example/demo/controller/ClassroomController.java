@@ -4,6 +4,7 @@ import com.example.demo.entity.Classroom;
 
 import com.example.demo.repository.ClassroomRepository;
 import com.example.demo.service.ClassroomService;
+import com.example.demo.service.UserService;
 import com.example.demo.service.impl.GoogleCalendarService;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
@@ -32,11 +33,17 @@ public class ClassroomController {
     private final ClassroomService classroomService;
     private final ClassroomRepository classroomRepository;
     private final GoogleCalendarService googleCalendarService;
+    private final UserService userService;
 
 
     @GetMapping("/get-all")
     public ResponseEntity getAllClassrooms() {
         return ResponseEntity.ok(classroomService.findAll());
+    }
+
+    @GetMapping("/{classroomId}/get-students-to-add")
+    public ResponseEntity listAllStudentsToAdd(@PathVariable Long classroomId) {
+        return ResponseEntity.ok(classroomService.listAllStudentsToAdd(classroomId));
     }
 
     @GetMapping("/get-all-by-teacherId")
