@@ -140,7 +140,7 @@ public class ClassroomServiceImpl implements ClassroomService {
         List<User> students = userRepository.findByRole("student");
         List<ClassroomDTO> classrooms = classroomRepository.findAllAsDTO();
 
-        try (InputStream is = new ClassPathResource("excel/classroomRegister.xlsx").getInputStream();
+        try (InputStream is = new ClassPathResource("excel/classroomRegister.xlsm").getInputStream();
              Workbook workbook = new XSSFWorkbook(is)) {
             Sheet specificationSheet = workbook.getSheet("Specification");
             // Creating header row
@@ -194,7 +194,7 @@ public class ClassroomServiceImpl implements ClassroomService {
                 // Prepare response with the file
                 return ResponseEntity.ok()
                         .contentType(org.springframework.http.MediaType.parseMediaType(contentType))
-                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"students.xlsx\"")
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"students.xlsm\"")
                         .body(resource);
             }
         } catch (Exception e) {
@@ -345,7 +345,6 @@ public class ClassroomServiceImpl implements ClassroomService {
 
     @Override
     public ResponseEntity<Resource> exportStudentList(long id) {
-
 //        ClassroomDTO classroomDTO = classroomRepository.findByIdAsDTO(id);
         List<Long> studentIds = studentClassroomRepository.findStudentsByClassroomId(id);
         List<User> students = userRepository.findAllById(studentIds);
@@ -361,7 +360,7 @@ public class ClassroomServiceImpl implements ClassroomService {
             //header
             CellStyle headerCellStyle = workbook.createCellStyle();
             headerCellStyle.setFont(font);
-            headerCellStyle.setFillForegroundColor(IndexedColors.ROSE.getIndex());
+            headerCellStyle.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
             headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
             headerCellStyle.setBorderBottom(BorderStyle.THIN);
             headerCellStyle.setBorderTop(BorderStyle.THIN);
@@ -369,7 +368,6 @@ public class ClassroomServiceImpl implements ClassroomService {
             headerCellStyle.setBorderRight(BorderStyle.THIN);
             //data
             CellStyle cellStyle = workbook.createCellStyle();
-            cellStyle.setFillForegroundColor(IndexedColors.ROSE.getIndex());
             cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
             cellStyle.setBorderBottom(BorderStyle.THIN);
             cellStyle.setBorderTop(BorderStyle.THIN);
