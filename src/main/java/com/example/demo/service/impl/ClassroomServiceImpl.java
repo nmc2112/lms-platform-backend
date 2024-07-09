@@ -223,7 +223,11 @@ public class ClassroomServiceImpl implements ClassroomService {
         classroomRepository.save(classroom);
         studentClassroomRepository.save(studentClassroom);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-        this.sendSimpleEmail(user.getEmail(), "LMS Education notification for student", "You has been added to a new classroom.\nSubject name: " + classroom.getSubjectName() + ".\nYour classroom meeting link: " + classroom.getMeetingLink() + "\nStart at:" + formatter.format(classroom.getStartTime()) + "\nEnd at:" + formatter.format(classroom.getEndTime()));
+        try {
+            this.sendSimpleEmail(user.getEmail(), "LMS Education notification for student", "You has been added to a new classroom.\nSubject name: " + classroom.getSubjectName() + ".\nYour classroom meeting link: " + classroom.getMeetingLink() + "\nStart at:" + formatter.format(classroom.getStartTime()) + "\nEnd at:" + formatter.format(classroom.getEndTime()));
+        }catch (Exception e){
+            System.out.println("Student added but got error in sending email to student");
+        }
         return findById(classroomId);
     }
 
