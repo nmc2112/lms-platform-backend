@@ -12,11 +12,11 @@ import java.util.List;
 
 @Repository
 public interface ClassroomRepository extends JpaRepository<Classroom, Long> {
-    @Query("SELECT new com.example.demo.dto.ClassroomDTO(c.id, c.subjectName, c.totalStudents, c.teacherId, u.name, c.startTime, c.endTime, c.meetingLink, c.description, c.imgUrl) " +
+    @Query("SELECT new com.example.demo.dto.ClassroomDTO(c.id, c.subjectName, c.totalStudents, c.teacherId, u.name, c.startTime, c.endTime, c.meetingLink, c.description, c.imgUrl,c.until,c.dayOfWeek) " +
             "FROM Classroom c left JOIN User u ON c.teacherId = u.id")
     List<ClassroomDTO> findAllAsDTO();
 
-    @Query("SELECT new com.example.demo.dto.ClassroomDTO(c.id, c.subjectName, c.totalStudents, c.teacherId, u.name, c.startTime, c.endTime, c.meetingLink, c.description, c.imgUrl) " +
+    @Query("SELECT new com.example.demo.dto.ClassroomDTO(c.id, c.subjectName, c.totalStudents, c.teacherId, u.name, c.startTime, c.endTime, c.meetingLink, c.description, c.imgUrl,c.until,c.dayOfWeek) " +
             "FROM Classroom c left JOIN User u ON c.teacherId = u.id where c.id = :classroomId")
     ClassroomDTO findByIdAsDTO(@Param("classroomId") Long classroomId);
 
@@ -29,7 +29,7 @@ public interface ClassroomRepository extends JpaRepository<Classroom, Long> {
             "and u.name = :teacherName LIMIT 1", nativeQuery = true)
     Classroom findBySubjectNameAndTeacherName(@Param("subjectName") String subjectName, @Param("teacherName") String teacherName);
 
-    @Query("SELECT new com.example.demo.dto.ClassroomDTO(c.id, c.subjectName, c.totalStudents, c.teacherId, u.name, c.startTime, c.endTime, c.meetingLink, c.description, c.imgUrl) " +
+    @Query("SELECT new com.example.demo.dto.ClassroomDTO(c.id, c.subjectName, c.totalStudents, c.teacherId, u.name, c.startTime, c.endTime, c.meetingLink, c.description, c.imgUrl,c.until,c.dayOfWeek) " +
             "FROM Classroom c left JOIN User u ON c.teacherId = u.id " +
             "WHERE u.userClerkId = :userId")
     List<ClassroomDTO> findAllByTeacherIdAsDTO(@Param("userId") String userId);

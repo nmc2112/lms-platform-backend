@@ -27,12 +27,14 @@ public class ClassroomDTO {
     private String meetingLink;
     private String description;
     private String imgUrl;
+    private Date until;
+    private String dayOfWeek;
     private List<User> listStudents;
 
     public ClassroomDTO() {
     }
 
-    public ClassroomDTO(Long id, String subjectName, Long totalStudents, Long teacherId,  String teacherName, Timestamp startTime, Timestamp endTime, String meetingLink, String description, String imgUrl) {
+    public ClassroomDTO(Long id, String subjectName, Long totalStudents, Long teacherId,  String teacherName, Timestamp startTime, Timestamp endTime, String meetingLink, String description, String imgUrl, Date until, String dayOfWeek) {
         this.id = id;
         this.subjectName = subjectName;
         this.teacherName = teacherName;
@@ -43,5 +45,7 @@ public class ClassroomDTO {
         this.meetingLink = meetingLink;
         this.description = description;
         this.imgUrl = imgUrl;
+        this.until = until;
+        this.dayOfWeek = dayOfWeek;
     }
 }
