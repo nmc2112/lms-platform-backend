@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
@@ -257,7 +258,7 @@ public class ClassroomServiceImpl implements ClassroomService {
                     switch (cellIdx) {
                         case 0:
                             String number = currentCell.getStringCellValue().trim();
-                            if (!number.isEmpty()&&!Utils.isLong(number)) {
+                            if (!number.isEmpty() && !Utils.isLong(number)) {
                                 errors.add("Line " + (i + 1) + ": Invalid number");
                             }
                             break;
@@ -303,7 +304,7 @@ public class ClassroomServiceImpl implements ClassroomService {
                     }
                 }
                 if (!subjectNameIsBlank && !teacherNameIsBlank) {
-                    Classroom classroom = classroomRepository.findBySubjectNameAndTeacherName(inputSubjectName,inputTeacherName);
+                    Classroom classroom = classroomRepository.findBySubjectNameAndTeacherName(inputSubjectName, inputTeacherName);
                     if (classroom == null) {
                         errors.add("Line " + (i + 1) + ": Classroom not found");
                     } else {
@@ -312,7 +313,7 @@ public class ClassroomServiceImpl implements ClassroomService {
                 }
                 rs.add(importClassroomDTO);
             }
-            if (errors.isEmpty()){
+            if (errors.isEmpty()) {
                 List<StudentClassroom> studentClassrooms = rs.stream()
                         .map(data -> new StudentClassroom(data.getStudent().getId(), data.getClassroom().getId()))
                         .toList();
@@ -344,6 +345,7 @@ public class ClassroomServiceImpl implements ClassroomService {
 
     @Override
     public ResponseEntity<Resource> exportStudentList(long id) {
+
 //        ClassroomDTO classroomDTO = classroomRepository.findByIdAsDTO(id);
         List<Long> studentIds = studentClassroomRepository.findStudentsByClassroomId(id);
         List<User> students = userRepository.findAllById(studentIds);
@@ -351,11 +353,36 @@ public class ClassroomServiceImpl implements ClassroomService {
              Workbook workbook = new XSSFWorkbook(is)) {
             Sheet specificationSheet = workbook.getSheetAt(0);
             List<Assignment> assignments = assignmentRepository.findAllByClassroomId(id);
+
+            XSSFFont font = (XSSFFont) workbook.createFont();
+            font.setBold(true);
+
+            // Create a cell style and set its properties
+            //header
+            CellStyle headerCellStyle = workbook.createCellStyle();
+            headerCellStyle.setFont(font);
+            headerCellStyle.setFillForegroundColor(IndexedColors.ROSE.getIndex());
+            headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            headerCellStyle.setBorderBottom(BorderStyle.THIN);
+            headerCellStyle.setBorderTop(BorderStyle.THIN);
+            headerCellStyle.setBorderLeft(BorderStyle.THIN);
+            headerCellStyle.setBorderRight(BorderStyle.THIN);
+            //data
+            CellStyle cellStyle = workbook.createCellStyle();
+            cellStyle.setFillForegroundColor(IndexedColors.ROSE.getIndex());
+            cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            cellStyle.setBorderBottom(BorderStyle.THIN);
+            cellStyle.setBorderTop(BorderStyle.THIN);
+            cellStyle.setBorderLeft(BorderStyle.THIN);
+            cellStyle.setBorderRight(BorderStyle.THIN);
+
             // Creating header row - skip 3 first static cells
             Row headerRow = specificationSheet.getRow(0);
             AtomicInteger index = new AtomicInteger(0);
             assignments.forEach(as -> {
-                headerRow.createCell(index.getAndIncrement() + 3).setCellValue(as.getName());
+                Cell cell = headerRow.createCell(index.getAndIncrement() + 3);
+                cell.setCellValue(as.getName());
+                cell.setCellStyle(headerCellStyle);
             });
             // Populating the data rows
             int rowNum = 1;
@@ -366,11 +393,14 @@ public class ClassroomServiceImpl implements ClassroomService {
                 row.createCell(2).setCellValue(student.getEmail());
                 AtomicInteger i = new AtomicInteger(0);
                 assignments.forEach(as -> {
-                    AssignmentStudent assignmentStudent = assignmentStudentRepository.findByAssignmentIdAndStudentId(as.getId(),student.getUserClerkId());
+                    AssignmentStudent assignmentStudent = assignmentStudentRepository.findByAssignmentIdAndStudentId(as.getId(), student.getUserClerkId());
                     if (assignmentStudent == null) {
-                        row.createCell(i.getAndIncrement() + 3);
+                        Cell cell = row.createCell(i.getAndIncrement() + 3);
+                        cell.setCellStyle(cellStyle);
                     } else {
-                        row.createCell(i.getAndIncrement() + 3).setCellValue(assignmentStudent.getResult());
+                        Cell cell = row.createCell(i.getAndIncrement() + 3);
+                        cell.setCellValue(assignmentStudent.getResult());
+                        cell.setCellStyle(cellStyle);
                     }
                 });
             }
