@@ -3,7 +3,9 @@ package com.example.demo.repository;
 import com.example.demo.dto.ClassroomDTO;
 import com.example.demo.entity.Classroom;
 import com.example.demo.entity.StudentClassroom;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -25,4 +27,9 @@ public interface StudentClassroomRepository extends JpaRepository<StudentClassro
             "left JOIN User u ON s.studentId = u.id " +
             "WHERE u.userClerkId = :userId")
     List<ClassroomDTO> findAllByStudentIdAsDTO(@Param("userId") String userId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM student_classroom WHERE classroomId = :classroomId AND studentId = :studentId", nativeQuery = true)
+    void deleteByStudentIdAndClassroomId(@Param("studentId") Long studentId, @Param("classroomId") Long classroomId);
 }

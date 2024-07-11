@@ -28,7 +28,7 @@ public class AssignmentStudent {
     @Column(name = "result")
     private Long result;
 
-    @Column(name = "detail")
+    @Column(columnDefinition = "json",name = "detail")
     private String detail;
 
 }

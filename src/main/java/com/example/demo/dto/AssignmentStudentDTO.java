@@ -13,4 +13,6 @@ public class AssignmentStudentDTO {
     private Long totalQuestions;
     private List<Question> questions;
 
+    private String detail;
+
 }

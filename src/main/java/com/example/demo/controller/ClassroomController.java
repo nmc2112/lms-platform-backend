@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.Classroom;
 
+import com.example.demo.entity.StudentClassroom;
 import com.example.demo.repository.ClassroomRepository;
 import com.example.demo.service.ClassroomService;
 import com.example.demo.service.UserService;
@@ -61,6 +62,12 @@ public class ClassroomController {
     public ResponseEntity getAllClassrooms(@RequestBody Classroom classroom) throws Exception {
         // id=null -> create ---- id!=null -> update
         return ResponseEntity.ok(classroomService.save(classroom));
+    }
+
+    @PostMapping("/delete-student")
+    public ResponseEntity deleteStudentInClassroom(@RequestBody StudentClassroom studentClassroom) {
+        classroomService.deleteStudentInClassroom(studentClassroom);
+        return ResponseEntity.ok("Deleted student with id " + studentClassroom.getStudentId());
     }
 
 //    @GetMapping("/createGoogleMeet")

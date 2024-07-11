@@ -97,6 +97,11 @@ public class ClassroomServiceImpl implements ClassroomService {
     }
 
     @Override
+    public void deleteStudentInClassroom(StudentClassroom studentClassroom) {
+        studentClassroomRepository.deleteByStudentIdAndClassroomId(studentClassroom.getStudentId(), studentClassroom.getClassroomId());
+    }
+
+    @Override
     public void sendSimpleEmail(String to, String subject, String text) {
 //        Properties prop = new Properties();
 //        prop.put("mail.smtp.host", "smtp.gmail.com");
@@ -304,7 +309,7 @@ public class ClassroomServiceImpl implements ClassroomService {
                     }
                 }
                 if (!subjectNameIsBlank && !teacherNameIsBlank) {
-                    Classroom classroom = classroomRepository.findBySubjectNameAndTeacherName(inputSubjectName, inputTeacherName);
+                    Classroom classroom = classroomRepository.findBySubjectNameAndTeacherName(inputSubjectName.trim(), inputTeacherName.trim());
                     if (classroom == null) {
                         errors.add("Line " + (i + 1) + ": Classroom not found");
                     } else {

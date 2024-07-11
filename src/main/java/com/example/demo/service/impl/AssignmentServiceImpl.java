@@ -49,6 +49,7 @@ public class AssignmentServiceImpl implements AssignmentService {
             if(assignmentStudent != null) {
                 assignmentDTO.setResult(assignmentStudent.getResult());
                 assignmentDTO.setStatus(assignmentStudent.getStatus());
+                assignmentDTO.setDetail(assignmentStudent.getDetail());
             }
             else{
                 assignmentDTO.setStatus(0L);
@@ -74,11 +75,25 @@ public class AssignmentServiceImpl implements AssignmentService {
         assignmentStudent.setAssignmentId(request.getAssignmentId());
         assignmentStudent.setStatus(1L);
         assignmentStudent.setResult(request.getResult());
+        assignmentStudent.setDetail(request.getDetail());
 
         User user = userRepository.findByUserClerkId(request.getStudentId());
         assignmentStudent.setStudentId(user.getId());
 
         return assignmentStudentRepository.save(assignmentStudent);
+    }
+
+    @Override
+    public AssignmentStudentDTO getFinishedAssignment(HttpServletRequest request, Long assignmentId) {
+        String userId = request.getHeader("userId");
+
+        AssignmentStudent assignmentStudent =  assignmentStudentRepository.findByAssignmentIdAndStudentId(assignmentId,userId);
+
+        AssignmentStudentDTO assignmentStudentDTO = new AssignmentStudentDTO();
+
+        assignmentStudentDTO.setDetail(assignmentStudent.getDetail());
+
+        return assignmentStudentDTO;
     }
 //    @Autowired
 //    private JavaMailSender mailSender;

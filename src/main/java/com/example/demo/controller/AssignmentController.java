@@ -32,6 +32,11 @@ public class AssignmentController {
         return ResponseEntity.ok(assignmentService.findAllByStudentId(request));
     }
 
+    @GetMapping("/get-finished-assignment/{assignmentId}")
+    public ResponseEntity getFinishedAssignment(HttpServletRequest request, @PathVariable Long assignmentId) {
+        return ResponseEntity.ok(assignmentService.getFinishedAssignment(request, assignmentId));
+    }
+
     @GetMapping("/get-assignment-by-id/{id}")
     public ResponseEntity getAllAssignmentById(@PathVariable("id")  Long id, HttpServletRequest request) {
         return ResponseEntity.ok(assignmentService.findById(id, request));

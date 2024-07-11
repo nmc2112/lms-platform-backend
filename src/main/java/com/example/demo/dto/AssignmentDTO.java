@@ -52,4 +52,5 @@ public class AssignmentDTO {
     private Long result;
 
     private Long status;
+    private String detail;
 }

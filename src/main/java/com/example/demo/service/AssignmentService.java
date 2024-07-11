@@ -20,4 +20,5 @@ public interface AssignmentService {
 
     public AssignmentStudent saveAssignmentByStudent(AssignmentStudentRequest assignmentStudent);
 
+    public AssignmentStudentDTO getFinishedAssignment(HttpServletRequest request, Long assignmentId);
 }

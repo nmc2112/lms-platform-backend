@@ -25,8 +25,8 @@ public interface ClassroomRepository extends JpaRepository<Classroom, Long> {
 
     @Query(value = "SELECT c.* from classroom c " +
             "left join User u on u.id = c.teacherId " +
-            "where c.subjectName = :subjectName " +
-            "and u.name = :teacherName LIMIT 1", nativeQuery = true)
+            "where trim(c.subjectName) = :subjectName " +
+            "and trim(u.name) = :teacherName LIMIT 1", nativeQuery = true)
     Classroom findBySubjectNameAndTeacherName(@Param("subjectName") String subjectName, @Param("teacherName") String teacherName);
 
     @Query("SELECT new com.example.demo.dto.ClassroomDTO(c.id, c.subjectName, c.totalStudents, c.teacherId, u.name, c.startTime, c.endTime, c.meetingLink, c.description, c.imgUrl,c.until,c.dayOfWeek) " +
