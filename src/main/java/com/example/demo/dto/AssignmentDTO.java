@@ -53,4 +53,8 @@ public class AssignmentDTO {
 
     private Long status;
     private String detail;
+
+    private String teacherComment;
+
+
 }

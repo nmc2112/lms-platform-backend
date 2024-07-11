@@ -32,6 +32,16 @@ public class AssignmentController {
         return ResponseEntity.ok(assignmentService.findAllByStudentId(request));
     }
 
+    @GetMapping("/get-assignment-by-teacherId")
+    public ResponseEntity getAllAssignmentByTeacherId(HttpServletRequest request) {
+        return ResponseEntity.ok(assignmentService.findAllByTeacherId(request));
+    }
+
+    @GetMapping("/get-students-by-assignmentId/{assignmentId}")
+    public ResponseEntity getAllStudentsByAssignmentId(@PathVariable Long assignmentId) {
+        return ResponseEntity.ok(assignmentService.getAllStudentsByAssignmentId(assignmentId));
+    }
+
     @GetMapping("/get-finished-assignment/{assignmentId}")
     public ResponseEntity getFinishedAssignment(HttpServletRequest request, @PathVariable Long assignmentId) {
         return ResponseEntity.ok(assignmentService.getFinishedAssignment(request, assignmentId));
@@ -45,6 +55,11 @@ public class AssignmentController {
     @PostMapping("/save-assignment")
     public ResponseEntity saveAssignment(@RequestBody AssignmentStudentRequest assignmentStudent) {
         return ResponseEntity.ok(assignmentService.saveAssignmentByStudent(assignmentStudent));
+    }
+
+    @PostMapping("/update-assignmentStudent")
+    public ResponseEntity updateAssignmentStudent(@RequestBody AssignmentStudent assignmentStudent, HttpServletRequest request) {
+        return ResponseEntity.ok(assignmentService.updateAssignmentStudent(assignmentStudent, request));
     }
 
 }

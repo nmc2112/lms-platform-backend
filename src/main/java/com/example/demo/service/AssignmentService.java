@@ -16,9 +16,15 @@ public interface AssignmentService {
 
     public List<AssignmentDTO> findAllByStudentId(HttpServletRequest request);
 
+    public List<AssignmentDTO> findAllByTeacherId(HttpServletRequest request);
+
     public AssignmentStudentDTO findById(Long id, HttpServletRequest request);
 
     public AssignmentStudent saveAssignmentByStudent(AssignmentStudentRequest assignmentStudent);
 
+    public AssignmentStudent updateAssignmentStudent(AssignmentStudent assignmentStudent, HttpServletRequest request);
+
     public AssignmentStudentDTO getFinishedAssignment(HttpServletRequest request, Long assignmentId);
+
+    public List<AssignmentByStudentResponse> getAllStudentsByAssignmentId(Long assignmentId);
 }

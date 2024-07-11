@@ -62,6 +62,12 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
+    public List<AssignmentDTO> findAllByTeacherId(HttpServletRequest request) {
+        String userId = request.getHeader("userId");
+        return assignmentRepository.findAllByTeacherId(userId);
+    }
+
+    @Override
     public AssignmentStudentDTO findById(Long id, HttpServletRequest request) {
         AssignmentStudentDTO assignmentStudentDTO = new AssignmentStudentDTO();
         Assignment assignment = assignmentRepository.findById(id).orElse(null);
@@ -87,6 +93,18 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
+    public AssignmentStudent updateAssignmentStudent(AssignmentStudent assignmentStudent, HttpServletRequest request) {
+        String userId = request.getHeader("userId");
+        AssignmentStudent existingAssignmentStudent = assignmentStudentRepository.findByAssignmentIdAndStudentId(assignmentStudent.getAssignmentId(), userId);
+
+        existingAssignmentStudent.setTeacherComment(assignmentStudent.getTeacherComment());
+        // Save the updated assignment student record back to the repository
+        return assignmentStudentRepository.save(existingAssignmentStudent);
+
+    }
+
+
+    @Override
     public AssignmentStudentDTO getFinishedAssignment(HttpServletRequest request, Long assignmentId) {
         String userId = request.getHeader("userId");
 
@@ -96,10 +114,41 @@ public class AssignmentServiceImpl implements AssignmentService {
 
         List<AnswerDTO> answerDTOS = this.parseJsonToDto(assignmentStudent.getDetail());
         assignmentStudentDTO.setDetail(answerDTOS);
+        assignmentStudentDTO.setStatus(assignmentStudent.getStatus());
+        assignmentStudentDTO.setTeacherComment(assignmentStudent.getTeacherComment());
         List<String> questionIds = answerDTOS.stream().map(AnswerDTO::getQuestionId).collect(Collectors.toList());
         List<Question> questions = questionRepository.findAllById(questionIds);
         assignmentStudentDTO.setQuestions(questions);
         return assignmentStudentDTO;
+    }
+
+    @Override
+    public List<AssignmentByStudentResponse> getAllStudentsByAssignmentId(Long assignmentId) {
+        List<AssignmentByStudentResponse> assignmentByStudentResponseList = new ArrayList<>();
+        Assignment assignment = assignmentRepository.findById(assignmentId).orElse(null);
+        List<Long> studentIds = studentClassroomRepository.findStudentsByClassroomId(assignment.getClassroomId());
+        List<User> students = userRepository.findAllById(studentIds);
+
+        students.forEach(student -> {
+            AssignmentByStudentResponse assignmentByStudentResponse = new AssignmentByStudentResponse();
+            AssignmentStudent assignmentStudent = assignmentStudentRepository.findByAssignmentIdAndStudentId(assignment.getId(), student.getUserClerkId());
+            if (assignmentStudent == null) {
+                assignmentByStudentResponse.setStudentId(student.getUserClerkId());
+                assignmentByStudentResponse.setStudentEmail(student.getEmail());
+                assignmentByStudentResponse.setStudentName(student.getName());
+                assignmentByStudentResponse.setAssignmentId(assignment.getId());
+                assignmentByStudentResponse.setStatus(0L);
+            } else {
+                assignmentByStudentResponse.setStudentId(student.getUserClerkId());
+                assignmentByStudentResponse.setStudentEmail(student.getEmail());
+                assignmentByStudentResponse.setStudentName(student.getName());
+                assignmentByStudentResponse.setStatus(1L);
+                assignmentByStudentResponse.setResult(assignmentStudent.getResult());
+                assignmentByStudentResponse.setAssignmentId(assignment.getId());
+            }
+            assignmentByStudentResponseList.add(assignmentByStudentResponse);
+        });
+        return assignmentByStudentResponseList;
     }
 
     private List<AnswerDTO> parseJsonToDto(String jsonArray) {

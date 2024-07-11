@@ -31,4 +31,6 @@ public class AssignmentStudent {
     @Column(columnDefinition = "json",name = "detail")
     private String detail;
 
+    @Column(name = "teacherComment")
+    private String teacherComment;
 }

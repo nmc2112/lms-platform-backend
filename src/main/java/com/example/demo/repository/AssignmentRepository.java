@@ -23,4 +23,12 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
 
     @Query("SELECT a FROM Assignment a where a.classroomId=:classroomId order by a.createdAt asc ")
     List<Assignment> findAllByClassroomId(@Param("classroomId") Long classroomId);
+
+    @Query("SELECT new com.example.demo.dto.AssignmentDTO(a.id, a.name, a.duration, a.numberOfQuestions, a.userId, a.classroomId, c.subjectName, a.quesCategoryId, q.name, a.createdAt, a.updatedAt) " +
+            " FROM Assignment a " +
+            "LEFT JOIN Classroom c ON c.id = a.classroomId " +
+            "LEFT JOIN QuestionCategory q ON q.id = a.quesCategoryId " +
+            "WHERE a.userId = :teacherId")
+    List<AssignmentDTO> findAllByTeacherId(@Param("teacherId") String teacherId);
+
 }
