@@ -6,6 +6,8 @@ import com.example.demo.repository.*;
 import com.example.demo.service.AssignmentService;
 import com.example.demo.service.ClassroomService;
 import com.example.demo.util.Utils;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +30,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -91,11 +94,23 @@ public class AssignmentServiceImpl implements AssignmentService {
 
         AssignmentStudentDTO assignmentStudentDTO = new AssignmentStudentDTO();
 
-        assignmentStudentDTO.setDetail(assignmentStudent.getDetail());
-
+        List<AnswerDTO> answerDTOS = this.parseJsonToDto(assignmentStudent.getDetail());
+        assignmentStudentDTO.setDetail(answerDTOS);
+        List<String> questionIds = answerDTOS.stream().map(AnswerDTO::getQuestionId).collect(Collectors.toList());
+        List<Question> questions = questionRepository.findAllById(questionIds);
+        assignmentStudentDTO.setQuestions(questions);
         return assignmentStudentDTO;
     }
-//    @Autowired
+
+    private List<AnswerDTO> parseJsonToDto(String jsonArray) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.readValue(jsonArray, new TypeReference<List<AnswerDTO>>() {});
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to parse JSON", e);
+        }
+    }//    @Autowired
 //    private JavaMailSender mailSender;
 
 
