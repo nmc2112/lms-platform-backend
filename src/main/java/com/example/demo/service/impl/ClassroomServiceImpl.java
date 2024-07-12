@@ -230,7 +230,7 @@ public class ClassroomServiceImpl implements ClassroomService {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
         try {
             this.sendSimpleEmail(user.getEmail(), "LMS Education notification for student", "You has been added to a new classroom.\nSubject name: " + classroom.getSubjectName() + ".\nYour classroom meeting link: " + classroom.getMeetingLink() + "\nStart at:" + formatter.format(classroom.getStartTime()) + "\nEnd at:" + formatter.format(classroom.getEndTime()));
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println("Student added but got error in sending email to student");
         }
         return findById(classroomId);
@@ -266,11 +266,13 @@ public class ClassroomServiceImpl implements ClassroomService {
                     Cell currentCell = cellsInRow.next();
                     switch (cellIdx) {
                         case 0:
+                            if (currentCell.getCellType()==CellType.STRING){
                             String number = currentCell.getStringCellValue().trim();
                             if (!number.isEmpty() && !Utils.isLong(number)) {
                                 errors.add("Line " + (i + 1) + ": Invalid number");
                             }
-                            break;
+                        }
+                        break;
                         case 1:
                             inputStudentName = currentCell.getStringCellValue().trim();
                             if (Utils.isNullOrEmpty(inputStudentName)) {
